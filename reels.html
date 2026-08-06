@@ -79,13 +79,22 @@
         frame.referrerPolicy = 'strict-origin-when-cross-origin';
         frame.src = frame.src.replace('https://www.youtube.com/embed/', 'https://www.youtube-nocookie.com/embed/');
       });
-      const nonEmbeddableIds = new Set(['GDHdmkyQ500', 'BkFptHb0MFc', 'MR5UlgWboSI', 'CChpNWAgnFA', 'WaIRZPtrgik']);
+      const directPlayIds = new Set(['GDHdmkyQ500', 'BkFptHb0MFc', 'MR5UlgWboSI', 'CChpNWAgnFA', 'WaIRZPtrgik']);
       document.querySelectorAll('.short-card iframe').forEach((frame) => {
         const match = frame.src.match(/embed\/([^?]+)/);
-        if (match && nonEmbeddableIds.has(match[1])) frame.closest('.short-card')?.remove();
+        if (!match || !directPlayIds.has(match[1])) return;
+        const id = match[1];
+        const link = document.createElement('a');
+        link.className = 'short-embed direct-youtube-link';
+        link.href = 'https://www.youtube.com/shorts/' + id;
+        link.target = '_blank';
+        link.rel = 'noreferrer';
+        link.setAttribute('aria-label', 'Play this Short on YouTube');
+        link.innerHTML = '<img src="https://i.ytimg.com/vi/' + id + '/hqdefault.jpg" alt="" /><span>Play on YouTube ↗</span>';
+        frame.replaceWith(link);
       });
       const publicShortsLabel = document.querySelector('.shorts-section:not(.unlisted-shorts-section) .eyebrow');
-      if (publicShortsLabel) publicShortsLabel.textContent = 'YouTube Shorts / 5 public + 5 unlisted';
+      if (publicShortsLabel) publicShortsLabel.textContent = 'YouTube Shorts / 10 public + 5 unlisted';
     </script>
     <script src="script.js"></script>
   </body>
