@@ -309,3 +309,84 @@ if (!reduceMotion) {
 window.addEventListener('scroll', () => {
   document.querySelector('.site-header')?.classList.toggle('is-scrolled', window.scrollY > 24);
 }, { passive: true });
+
+/* Custom crosshair: scrolling down turns clockwise, scrolling up turns counter-clockwise. */
+(function setupScrollCursor() {
+  if (window.matchMedia('(pointer:coarse)').matches) return;
+  const cursor = document.createElement('div');
+  cursor.className = 'cursor-crosshair';
+  cursor.setAttribute('aria-hidden', 'true');
+  document.body.append(cursor);
+  document.body.classList.add('cursor-enhanced');
+
+  let rotation = 0;
+  let lastScrollY = window.scrollY;
+  const setPointerState = (event) => {
+    cursor.style.left = `${event.clientX}px`;
+    cursor.style.top = `${event.clientY}px`;
+    cursor.classList.add('is-visible');
+    const target = event.target;
+    const clickable = target?.closest?.('a,button,[role="button"],summary,select,input,textarea,iframe') || target?.matches?.('a,button,iframe');
+    cursor.classList.toggle('is-clickable', Boolean(clickable));
+  };
+  document.addEventListener('pointermove', setPointerState, { passive: true });
+  document.addEventListener('pointerover', setPointerState, { passive: true });
+  document.addEventListener('pointerout', (event) => {
+    if (!event.relatedTarget) cursor.classList.remove('is-visible');
+  }, { passive: true });
+  window.addEventListener('scroll', () => {
+    const currentScrollY = window.scrollY;
+    if (currentScrollY !== lastScrollY) {
+      rotation += currentScrollY > lastScrollY ? 24 : -24;
+      cursor.style.setProperty('--cursor-rotation', `${rotation}deg`);
+      lastScrollY = currentScrollY;
+    }
+  }, { passive: true });
+})();
+
+/* The Reels intro borrows the Home planet's tools, then lets them drift in place. */
+(function setupReelsToolBurst() {
+  const cluster = document.querySelector('#reels-tools-cluster');
+  if (!cluster) return;
+  const orbs = [...cluster.querySelectorAll('.reels-tool-orb')];
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const randomBetween = (minimum, maximum) => minimum + Math.random() * (maximum - minimum);
+
+  orbs.forEach((orb, index) => {
+    const angle = (index / orbs.length) * Math.PI * 2 + randomBetween(-0.32, 0.32);
+    const distance = randomBetween(68, 150);
+    orb.style.setProperty('--x', `${Math.cos(angle) * distance}px`);
+    orb.style.setProperty('--y', `${Math.sin(angle) * distance * 0.72}px`);
+    orb.style.setProperty('--size', `${Math.round(randomBetween(52, 86))}px`);
+    orb.style.setProperty('--rotation', `${Math.round(randomBetween(-14, 14))}deg`);
+    orb.style.setProperty('--float-x', `${Math.round(randomBetween(-10, 10))}px`);
+    orb.style.setProperty('--float-y', `${Math.round(randomBetween(-12, 12))}px`);
+    orb.style.setProperty('--float-duration', `${randomBetween(3.8, 6.2).toFixed(2)}s`);
+    orb.style.setProperty('--float-delay', `${randomBetween(-3, 0).toFixed(2)}s`);
+    orb.style.setProperty('--burst-delay', `${(index * 0.055).toFixed(2)}s`);
+  });
+
+  const launch = () => {
+    if (reducedMotion) {
+      cluster.classList.add('is-idle');
+      return;
+    }
+    cluster.classList.add('is-burst');
+    window.setTimeout(() => {
+      cluster.classList.remove('is-burst');
+      cluster.classList.add('is-idle');
+    }, 1850);
+  };
+
+  if (!('IntersectionObserver' in window)) {
+    launch();
+    return;
+  }
+  const clusterObserver = new IntersectionObserver((entries) => {
+    if (entries.some((entry) => entry.isIntersecting)) {
+      clusterObserver.disconnect();
+      launch();
+    }
+  }, { threshold: 0.16 });
+  clusterObserver.observe(cluster);
+})();
