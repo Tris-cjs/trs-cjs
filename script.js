@@ -351,20 +351,71 @@ window.addEventListener('scroll', () => {
   const orbs = [...cluster.querySelectorAll('.reels-tool-orb')];
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const randomBetween = (minimum, maximum) => minimum + Math.random() * (maximum - minimum);
+  const burstDuration = 1240;
+  const burstStagger = 55;
+  const pointer = { x: 0, y: 0, active: false };
+  const orbStates = [];
 
   orbs.forEach((orb, index) => {
     const angle = (index / orbs.length) * Math.PI * 2 + randomBetween(-0.32, 0.32);
     const distance = randomBetween(68, 150);
-    orb.style.setProperty('--x', `${Math.cos(angle) * distance}px`);
-    orb.style.setProperty('--y', `${Math.sin(angle) * distance * 0.72}px`);
+    const baseX = Math.cos(angle) * distance;
+    const baseY = Math.sin(angle) * distance * 0.72;
+    orbStates.push({ orb, baseX, baseY, avoidX: 0, avoidY: 0, velocityX: 0, velocityY: 0 });
+    orb.style.setProperty('--x', `${baseX}px`);
+    orb.style.setProperty('--y', `${baseY}px`);
     orb.style.setProperty('--size', `${Math.round(randomBetween(52, 86))}px`);
     orb.style.setProperty('--rotation', `${Math.round(randomBetween(-14, 14))}deg`);
     orb.style.setProperty('--float-x', `${Math.round(randomBetween(-10, 10))}px`);
     orb.style.setProperty('--float-y', `${Math.round(randomBetween(-12, 12))}px`);
     orb.style.setProperty('--float-duration', `${randomBetween(3.8, 6.2).toFixed(2)}s`);
-    orb.style.setProperty('--float-delay', `${randomBetween(-3, 0).toFixed(2)}s`);
-    orb.style.setProperty('--burst-delay', `${(index * 0.055).toFixed(2)}s`);
+    /* Positive delays preserve the burst's final transform instead of jumping into the middle of a float cycle. */
+    orb.style.setProperty('--float-delay', `${randomBetween(0.08, 1.15).toFixed(2)}s`);
+    orb.style.setProperty('--burst-delay', `${(index * burstStagger / 1000).toFixed(2)}s`);
+    orb.style.setProperty('--avoid-x', '0px');
+    orb.style.setProperty('--avoid-y', '0px');
   });
+
+  const setPointer = (event) => {
+    pointer.x = event.clientX;
+    pointer.y = event.clientY;
+    pointer.active = true;
+  };
+  document.addEventListener('pointermove', setPointer, { passive: true });
+  document.addEventListener('pointerout', (event) => {
+    if (!event.relatedTarget) pointer.active = false;
+  }, { passive: true });
+  window.addEventListener('blur', () => { pointer.active = false; }, { passive: true });
+
+  const updatePointerAvoidance = () => {
+    const bounds = cluster.getBoundingClientRect();
+    const centerX = bounds.left + bounds.width / 2;
+    const centerY = bounds.top + bounds.height / 2;
+    const pointerX = pointer.x - centerX;
+    const pointerY = pointer.y - centerY;
+
+    orbStates.forEach((state) => {
+      const deltaX = state.baseX + state.avoidX - pointerX;
+      const deltaY = state.baseY + state.avoidY - pointerY;
+      const distance = Math.hypot(deltaX, deltaY);
+      const influence = pointer.active ? Math.max(0, 1 - distance / 128) : 0;
+      const push = influence * influence * 34;
+      const targetX = distance > 0 ? (deltaX / distance) * push : 0;
+      const targetY = distance > 0 ? (deltaY / distance) * push : 0;
+
+      state.velocityX += (targetX - state.avoidX) * 0.12;
+      state.velocityY += (targetY - state.avoidY) * 0.12;
+      state.velocityX *= 0.78;
+      state.velocityY *= 0.78;
+      state.avoidX = Math.max(-42, Math.min(42, state.avoidX + state.velocityX));
+      state.avoidY = Math.max(-42, Math.min(42, state.avoidY + state.velocityY));
+      state.orb.style.setProperty('--avoid-x', `${state.avoidX.toFixed(2)}px`);
+      state.orb.style.setProperty('--avoid-y', `${state.avoidY.toFixed(2)}px`);
+    });
+
+    requestAnimationFrame(updatePointerAvoidance);
+  };
+  requestAnimationFrame(updatePointerAvoidance);
 
   const launch = () => {
     if (reducedMotion) {
@@ -372,10 +423,28 @@ window.addEventListener('scroll', () => {
       return;
     }
     cluster.classList.add('is-burst');
-    window.setTimeout(() => {
+
+    let handedOff = false;
+    const switchToIdle = () => {
+      if (handedOff) return;
+      handedOff = true;
       cluster.classList.remove('is-burst');
       cluster.classList.add('is-idle');
-    }, 1850);
+    };
+    const fallback = window.setTimeout(switchToIdle, burstDuration + (orbs.length - 1) * burstStagger + 160);
+    const onBurstEnd = (event) => {
+      if (event.animationName !== 'reels-tool-burst') return;
+      if (orbs.every((orb) => orb.dataset.burstDone === 'true')) {
+        window.clearTimeout(fallback);
+        switchToIdle();
+      }
+    };
+    orbs.forEach((orb) => {
+      orb.addEventListener('animationend', () => {
+        orb.dataset.burstDone = 'true';
+        onBurstEnd({ animationName: 'reels-tool-burst' });
+      }, { once: true });
+    });
   };
 
   if (!('IntersectionObserver' in window)) {
