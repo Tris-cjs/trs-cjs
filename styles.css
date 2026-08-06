@@ -131,3 +131,18 @@ body { transition:background-color .45s ease,color .45s ease; }
 @media (prefers-reduced-motion: reduce) {
   .direct-youtube-link img { transition: none; }
 }
+
+/* Live presentation updates */
+.brand-logo { position:relative; display:grid; width:58px; height:58px; place-items:center; overflow:hidden; }
+.brand-logo img { position:static; display:block; width:58px; height:58px; max-width:none; object-fit:contain; }
+.featured-video-heading { margin-bottom:0; font-size:clamp(68px,8vw,112px); }
+.contact-page .page-hero { display:grid; grid-template-columns:minmax(0,1fr) minmax(300px,420px); column-gap:60px; align-items:end; }
+.contact-page .page-hero .eyebrow,.contact-page .page-hero h1,.contact-page .page-hero .page-intro { grid-column:1; }
+.contact-hero-details { grid-column:2; grid-row:1 / span 3; align-self:end; width:100%; max-width:420px; margin-left:auto; }
+.contact-hero-details .contact-detail { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:15px 0; border-bottom:1px solid var(--line); color:var(--ink); font-size:17px; }
+.contact-hero-details .contact-detail span:first-child { color:var(--muted); font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+.contact-hero-details .contact-detail a { color:inherit; text-align:right; }
+.contact-hero-details .contact-detail a:hover { color:var(--accent); }
+.dark .contact-page .contact-hero-details .contact-detail { color:var(--ink); border-color:var(--line); }
+.dark .contact-page .contact-hero-details .contact-detail span:first-child { color:var(--muted); }
+@media (max-width:760px) { .brand-logo,.brand-logo img { width:48px; height:48px; } .contact-page .page-hero { display:block; } .contact-hero-details { max-width:none; margin-top:42px; } .contact-hero-details .contact-detail { align-items:flex-start; flex-direction:column; gap:6px; font-size:16px; } .contact-hero-details .contact-detail a { text-align:left; } .featured-video-heading { font-size:clamp(56px,14vw,84px); } }
