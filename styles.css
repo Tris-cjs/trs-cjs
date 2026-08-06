@@ -76,3 +76,58 @@ body { transition:background-color .45s ease,color .45s ease; }
 .section-heading .eyebrow,.service-list .service-row,.contact-card { will-change:transform; }.js .section-heading .eyebrow { transition:letter-spacing .7s ease,color .35s ease; }.js .section-heading.is-visible .eyebrow { letter-spacing:.16em; }
 @keyframes hero-rise { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:none; } } @keyframes soft-pulse { 0%,100%{opacity:.72} 50%{opacity:1} }
 @media (prefers-reduced-motion:reduce) { .hero-copy .eyebrow,.hero-copy h1,.hero-copy .hero-intro,.hero-copy .hero-actions { animation:none; } .project-card,.project-art::after,.switch-thumb { transition:none; } .project-card:hover { transform:none; } }
+
+/* YouTube Shorts that require direct playback */
+.direct-youtube-link {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  isolation: isolate;
+}
+.direct-youtube-link img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .35s ease;
+}
+.direct-youtube-link::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(17,17,17,.08), rgba(17,17,17,.52));
+  content: '';
+  pointer-events: none;
+}
+.direct-youtube-link span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: calc(100% - 28px);
+  min-height: 42px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,.72);
+  border-radius: 999px;
+  background: rgba(17,17,17,.72);
+  color: #fff;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .04em;
+  text-align: center;
+  text-transform: uppercase;
+  transform: translate(-50%,-50%);
+  transition: background-color .3s ease, border-color .3s ease;
+}
+.direct-youtube-link:hover img {
+  transform: scale(1.04);
+}
+.direct-youtube-link:hover span {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #111;
+}
+@media (prefers-reduced-motion: reduce) {
+  .direct-youtube-link img { transition: none; }
+}
