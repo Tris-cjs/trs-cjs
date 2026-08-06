@@ -1,0 +1,1 @@
+Fresh deployment trigger after a transient GitHub Actions outage.
