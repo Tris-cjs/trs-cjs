@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Contact Tristan about video editing, campaigns, music videos, and finishing." />
+    <title>Contact &mdash; Tristan Video Editor</title>
+    <link rel="icon" type="image/svg+xml" href="tristan-logo.svg" />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .contact-details { display:grid; width:100%; margin:26px 0 30px; }
+      .contact-detail { display:flex; justify-content:space-between; gap:24px; padding:12px 0; border-bottom:1px solid rgba(255,255,255,.16); color:#fff; font-size:12px; }
+      .contact-detail span:first-child { color:#92928d; font-family:'DM Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:.08em; }
+      .contact-detail a { color:inherit; text-align:right; }
+      .contact-detail a:hover { color:var(--accent); }
+      .dark .contact-detail { border-color:rgba(17,17,17,.16); color:#111; }
+      .dark .contact-detail a:hover { color:#789000; }
+      @media (max-width:760px) { .contact-detail { align-items:flex-start; flex-direction:column; gap:5px; }.contact-detail a { text-align:left; } }
+    </style>
+    <script>document.documentElement.classList.add('js');</script>
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav shell" aria-label="Main navigation">
+        <a class="wordmark brand-logo" href="index.html" data-transition="zoom-in" aria-label="Tristan home"><img src="tristan-logo.svg" alt="Tristan" /></a>
+        <div class="nav-links" id="nav-links">
+          <a href="reels.html" data-transition="zoom-out">Reel</a>
+          <a href="index.html#about" data-transition="zoom-in">About</a>
+          <a href="contact.html" aria-current="page">Contact</a>
+        </div>
+        <div class="nav-actions">
+          <button class="theme-switch" id="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Switch to dark mode">
+            <span class="switch-track"><span class="switch-icon switch-sun" aria-hidden="true">&#9788;</span><span class="switch-icon switch-moon" aria-hidden="true">&#9790;</span><span class="switch-thumb"></span></span>
+          </button>
+          <button class="menu-toggle" id="menu-toggle" type="button" aria-controls="nav-links" aria-expanded="false" aria-label="Open menu"><span></span><span></span></button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="page-main contact-page" id="top">
+      <section class="page-hero shell reveal">
+        <p class="eyebrow">Have a story to tell?</p>
+        <h1>Let&#8217;s make it<br /><em>move people.</em></h1>
+        <p class="page-intro">Tell me about the brief, the big idea, or the footage that needs to become something more.</p>
+      </section>
+
+      <section class="contact-section shell">
+        <div class="contact-card reveal">
+          <div><p class="eyebrow">Start a conversation</p><h2>Bring the raw<br /><em>cut to life.</em></h2></div>
+          <div class="contact-side">
+            <p>I&#8217;m always up for hearing about a good brief, a big idea, or footage that needs to become something more.</p>
+            <div class="contact-details" aria-label="Contact details">
+              <div class="contact-detail"><span>Discord</span><span>@randomrevort</span></div>
+              <div class="contact-detail"><span>WhatsApp</span><a href="https://wa.me/639506513724" target="_blank" rel="noreferrer">0950 651 3724</a></div>
+              <div class="contact-detail"><span>Telegram</span><a href="https://t.me/randomrevort" target="_blank" rel="noreferrer">@randomrevort</a></div>
+              <div class="contact-detail"><span>YouTube Channel</span><a href="https://www.youtube.com/@randomrevort" target="_blank" rel="noreferrer">@randomrevort</a></div>
+              <div class="contact-detail"><span>Email</span><a href="mailto:tristancajes@gmail.com">tristancajes@gmail.com</a></div>
+            </div>
+            <a class="button button-light" href="mailto:tristancajes@gmail.com">Email Tristan <span>&#8594;</span></a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer shell">
+      <p>&copy; <span id="year"></span> Tristan. Cut with intention.</p>
+      <div class="footer-links"><a href="index.html" data-transition="zoom-in">Back home &#8593;</a><a href="reels.html" data-transition="zoom-out">View reels</a><a href="contact.html">LinkedIn</a></div>
+    </footer>
+    <script src="script.js"></script>
+  </body>
+</html>
