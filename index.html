@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Tristan is a video editor crafting rhythm, feeling, and stories in motion." />
+    <title>Tristan — Video Editor</title>
+    <link rel="icon" type="image/svg+xml" href="tristan-logo.svg" />
+    <link rel="stylesheet" href="styles.css" />
+    <script>document.documentElement.classList.add('js');</script>
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav shell" aria-label="Main navigation">
+        <a class="wordmark brand-logo" href="index.html" data-transition="zoom-in" aria-label="Tristan home"><img src="tristan-logo.svg" alt="Tristan" /></a>
+        <div class="nav-links" id="nav-links">
+          <a href="reels.html" data-transition="zoom-out">Reel</a>
+          <a href="index.html#about">About</a>
+          <a href="contact.html" data-transition="zoom-in">Contact</a>
+        </div>
+        <div class="nav-actions">
+          <button class="theme-switch" id="theme-toggle" type="button" role="switch" aria-checked="false" aria-label="Switch to dark mode">
+            <span class="switch-track"><span class="switch-icon switch-sun" aria-hidden="true">&#9788;</span><span class="switch-icon switch-moon" aria-hidden="true">&#9790;</span><span class="switch-thumb"></span></span>
+          </button>
+          <button class="menu-toggle" id="menu-toggle" type="button" aria-controls="nav-links" aria-expanded="false" aria-label="Open menu"><span></span><span></span></button>
+        </div>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero shell">
+        <div class="hero-copy reveal">
+          <p class="eyebrow"><span class="status-dot"></span> Available for select projects</p>
+          <h1>Cutting moments<br />into <em>motion.</em></h1>
+          <p class="hero-intro">I’m Tristan, a video editor shaping rhythm, story, and feeling for brands, artists, and people with something worth saying.</p>
+          <div class="hero-actions">
+            <a class="button button-dark" href="reels.html" data-transition="zoom-out">Watch selected work <span>↗</span></a>
+            <a class="text-link" href="contact.html" data-transition="zoom-in">Start a project <span>↗</span></a>
+          </div>
+        </div>
+
+        <div class="hero-reel reveal" aria-label="Interactive editing tools planet">
+          <div class="reel-ring ring-one" aria-hidden="true"></div>
+          <div class="reel-ring ring-two" aria-hidden="true"></div>
+          <div class="reel-ring ring-three" aria-hidden="true"></div>
+          <div class="logo-orbit" aria-label="Editing tools">
+            <div class="orbit-path" style="--radius:214px;--delay:-1s" title="CapCut">
+              <div class="orbit-logo logo-capcut" role="img" aria-label="CapCut"><img class="orbit-logo-img" src="https://commons.wikimedia.org/wiki/Special:FilePath/Capcut-icon.svg" alt="" /></div>
+            </div>
+            <div class="orbit-path" style="--radius:166px;--delay:-5s" title="Canva">
+              <div class="orbit-logo logo-canva" role="img" aria-label="Canva"><img class="orbit-logo-img" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/canva.svg" alt="" /></div>
+            </div>
+            <div class="orbit-path" style="--radius:244px;--delay:-9s" title="DaVinci Resolve">
+              <div class="orbit-logo logo-davinci" role="img" aria-label="DaVinci Resolve"><img class="orbit-logo-img" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/davinciresolve.svg" alt="" /></div>
+            </div>
+            <div class="orbit-path" style="--radius:178px;--delay:-13s" title="Adobe Premiere Pro">
+              <div class="orbit-logo logo-premiere" role="img" aria-label="Adobe Premiere Pro"><img class="orbit-logo-img" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/adobepremierepro.svg" alt="" /></div>
+            </div>
+            <div class="orbit-path" style="--radius:226px;--delay:-17s" title="Adobe After Effects">
+              <div class="orbit-logo logo-after-effects" role="img" aria-label="Adobe After Effects"><img class="orbit-logo-img" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/adobeaftereffects.svg" alt="" /></div>
+            </div>
+            <div class="orbit-path" style="--radius:194px;--delay:-21s" title="Final Cut Pro">
+              <div class="orbit-logo logo-final-cut" role="img" aria-label="Final Cut Pro"><img class="orbit-logo-img" src="https://commons.wikimedia.org/wiki/Special:FilePath/FinalCutProACS2026.png" alt="" /></div>
+            </div>
+          </div>
+          <div class="timecode timecode-top">00:02:14:08</div>
+          <div class="timecode timecode-bottom">REC • 24 FPS</div>
+          <canvas class="particle-field" id="particle-field" aria-hidden="true"></canvas>
+          <p class="frame-label">Find the frame<br />that stays with you</p>
+        </div>
+      </section>
+
+      <div class="ticker" aria-hidden="true">
+        <div class="ticker-track">
+          <span>Editing</span><b>✳</b><span>Storytelling</span><b>✳</b><span>Color</span><b>✳</b><span>Motion</span><b>✳</b><span>Sound</span><b>✳</b>
+          <span>Editing</span><b>✳</b><span>Storytelling</span><b>✳</b><span>Color</span><b>✳</b><span>Motion</span><b>✳</b><span>Sound</span><b>✳</b>
+        </div>
+      </div>
+
+      <section class="about-section" id="about">
+        <div class="shell about-layout">
+          <div class="section-heading reveal"><p class="eyebrow">A little about me</p><h2>Feel it first.<br /><em>Then find the cut.</em></h2></div>
+          <div class="about-copy reveal">
+            <p class="about-lead">The right edit doesn’t just tell you what happened. It makes you feel why it mattered.</p>
+            <p>I work with directors, agencies, and independent artists to shape raw footage into a clear point of view. From the first assembly to the final grade, I care about the tiny choices that make a film land.</p>
+            <a class="text-link" href="contact.html" data-transition="zoom-in">More about my process <span>↗</span></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="services-section shell">
+        <div class="section-heading reveal"><p class="eyebrow">What I do</p><h2>From first frame<br /><em>to final export.</em></h2></div>
+        <div class="service-list">
+          <div class="service-row reveal"><span class="service-number">01</span><h3>Offline editing</h3><p>Finding the pace, structure, and emotional throughline that makes a story feel inevitable.</p><span class="service-arrow">↗</span></div>
+          <div class="service-row reveal"><span class="service-number">02</span><h3>Color & finish</h3><p>Creating a considered visual world, then carrying every detail through to a polished final master.</p><span class="service-arrow">↗</span></div>
+          <div class="service-row reveal"><span class="service-number">03</span><h3>Social & campaigns</h3><p>Building cutdowns and modular content that make one great idea work beautifully everywhere.</p><span class="service-arrow">↗</span></div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="site-footer shell">
+      <p>© <span id="year"></span> Tristan. Cut with intention.</p>
+      <div class="footer-links"><a href="#top">Back to top ↑</a><a href="contact.html" data-transition="zoom-in">Instagram</a><a href="contact.html" data-transition="zoom-in">LinkedIn</a></div>
+    </footer>
+    <script src="script.js"></script>
+  </body>
+</html>
