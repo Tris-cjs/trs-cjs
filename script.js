@@ -82,11 +82,11 @@ if (tickerTrack && tickerGroups.length === 2) {
 
 const starField = document.querySelector('#site-stars');
 if (starField) {
-  const starCount = window.innerWidth < 700 ? 54 : 96;
+  const starCount = window.innerWidth < 700 ? 36 : 64;
   const fragment = document.createDocumentFragment();
   for (let index = 0; index < starCount; index += 1) {
     const star = document.createElement('span');
-    const glitter = index % 17 === 5;
+    const glitter = index % 19 === 5;
     const noticeable = index % 13 === 0 || glitter;
     const size = noticeable ? 1.7 + Math.random() * 1.15 : 0.55 + Math.random() * 1.15;
     star.className = `site-star${noticeable ? ' is-noticeable' : ''}${glitter ? ' is-glitter' : ''}`;
@@ -128,14 +128,8 @@ if (shortsGrid) {
     const card = document.createElement('article');
     card.className = 'short-card reveal';
     card.innerHTML = `
-      <div class="video-frame short-frame">
-        <iframe
-          src="https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&enablejsapi=1&playsinline=1"
-          title="${title}"
-          loading="lazy"
-          referrerpolicy="strict-origin-when-cross-origin"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen></iframe>
+      <div class="video-frame short-frame" data-video-id="${id}" data-video-title="${title}">
+        <img class="video-poster" src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async" fetchpriority="low" aria-hidden="true" onerror="this.remove()" />
         <button class="video-hit-layer" type="button" aria-label="Play ${title}">
           <span class="video-control"><span class="video-control-icon" aria-hidden="true">▶</span><span class="video-control-label">Play video</span></span>
         </button>
@@ -150,21 +144,38 @@ if (shortsGrid) {
 }
 
 document.querySelectorAll('.video-frame').forEach((frame) => {
-  const iframe = frame.querySelector('iframe');
   const hitLayer = frame.querySelector('.video-hit-layer');
-  if (!iframe || !hitLayer) return;
+  if (!hitLayer) return;
 
+  let iframe = null;
   let playing = false;
   const icon = hitLayer.querySelector('.video-control-icon');
   const label = hitLayer.querySelector('.video-control-label');
 
   hitLayer.addEventListener('click', () => {
-    playing = !playing;
-    iframe.contentWindow?.postMessage(JSON.stringify({
-      event: 'command',
-      func: playing ? 'playVideo' : 'pauseVideo',
-      args: [],
-    }), '*');
+    if (!iframe) {
+      const id = frame.dataset.videoId;
+      const title = frame.dataset.videoTitle || 'Video by Tristan';
+      if (!id) return;
+
+      iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1&playsinline=1`;
+      iframe.title = title;
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.allowFullscreen = true;
+      iframe.addEventListener('load', () => frame.querySelector('.video-poster')?.remove(), { once: true });
+      frame.insertBefore(iframe, hitLayer);
+      frame.classList.add('is-loaded');
+      playing = true;
+    } else {
+      playing = !playing;
+      iframe.contentWindow?.postMessage(JSON.stringify({
+        event: 'command',
+        func: playing ? 'playVideo' : 'pauseVideo',
+        args: [],
+      }), '*');
+    }
 
     hitLayer.classList.toggle('is-playing', playing);
     hitLayer.setAttribute('aria-label', `${playing ? 'Pause' : 'Play'} ${iframe.title}`);
@@ -203,15 +214,20 @@ const solarState = {
   particles: [],
   orbitRings: [],
   start: performance.now(),
+  visible: true,
+  lastFrame: 0,
+  frameInterval: 1000 / 45,
 };
 
 function sizeSolarSystem() {
   if (!solarSystem) return;
   const bounds = solarSystem.getBoundingClientRect();
-  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  const compactMode = window.innerWidth < 700;
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, compactMode ? 1.35 : 1.75);
   solarState.width = bounds.width;
   solarState.height = bounds.height;
   solarState.scale = Math.min(1, bounds.width / 680);
+  solarState.frameInterval = 1000 / (compactMode ? 30 : 45);
 
   if (particleCanvas && particleContext) {
     particleCanvas.width = Math.round(bounds.width * pixelRatio);
@@ -219,7 +235,8 @@ function sizeSolarSystem() {
     particleContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
   }
 
-  solarState.particles = Array.from({ length: Math.round(220 * Math.max(0.68, solarState.scale)) }, () => {
+  const particleCount = compactMode ? 84 : window.innerWidth < 1000 ? 120 : 150;
+  solarState.particles = Array.from({ length: particleCount }, () => {
     const radius = Math.pow(Math.random(), 0.58) * Math.min(bounds.width, bounds.height) * 0.27;
     const angle = Math.random() * Math.PI * 2;
     return {
@@ -274,6 +291,8 @@ function drawParticles(time) {
   if (!particleContext || !particleCanvas) return;
   const centerX = solarState.width / 2;
   const centerY = solarState.height / 2;
+  const pointerPixelX = centerX + solarState.pointerX * solarState.width / 2;
+  const pointerPixelY = centerY + solarState.pointerY * solarState.height / 2;
   particleContext.clearRect(0, 0, solarState.width, solarState.height);
 
   solarState.particles.forEach((particle) => {
@@ -281,10 +300,9 @@ function drawParticles(time) {
     const pulse = 1 + Math.sin(time * 0.0014 + particle.phase) * 0.035;
     const x = centerX + Math.cos(angle) * particle.radius * pulse;
     const y = centerY + Math.sin(angle) * particle.radius * 0.56 * pulse;
-    const pointerPixelX = centerX + solarState.pointerX * solarState.width / 2;
-    const pointerPixelY = centerY + solarState.pointerY * solarState.height / 2;
-    const distance = Math.hypot(pointerPixelX - x, pointerPixelY - y);
-    const influence = solarState.pointerActive ? Math.max(0, 1 - distance / 54) : 0;
+    const influence = solarState.pointerActive
+      ? Math.max(0, 1 - Math.hypot(pointerPixelX - x, pointerPixelY - y) / 54)
+      : 0;
 
     particleContext.beginPath();
     particleContext.arc(x, y, particle.size + influence * 0.85, 0, Math.PI * 2);
@@ -296,6 +314,11 @@ function drawParticles(time) {
 }
 
 function animateSolarSystem(time) {
+  if (!reduceMotion && (!solarState.visible || time - solarState.lastFrame < solarState.frameInterval)) {
+    requestAnimationFrame(animateSolarSystem);
+    return;
+  }
+  solarState.lastFrame = time;
   const elapsed = reduceMotion ? 0 : (time - solarState.start) / 1000;
   const pointerLightX = solarState.pointerActive ? solarState.pointerX * 3 : 0;
   const pointerLightY = solarState.pointerActive ? solarState.pointerY * 3 : 0;
@@ -361,6 +384,10 @@ function animateSolarSystem(time) {
 
 if (solarSystem && planetSystem) {
   sizeSolarSystem();
+  const solarVisibilityObserver = new IntersectionObserver(([entry]) => {
+    solarState.visible = entry.isIntersecting;
+  }, { rootMargin: '120px 0px' });
+  solarVisibilityObserver.observe(solarSystem);
   window.addEventListener('resize', sizeSolarSystem, { passive: true });
   requestAnimationFrame(animateSolarSystem);
 }
