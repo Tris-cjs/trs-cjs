@@ -265,41 +265,70 @@ h2 em {
   z-index: 20;
   top: 50%;
   left: 50%;
-  width: 72px;
-  height: 72px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  filter: saturate(1.12);
+  background: #fff;
+  filter: brightness(1.2);
   box-shadow:
-    0 0 12px 3px rgba(255, 244, 154, 0.9),
-    0 0 34px 12px rgba(255, 184, 40, 0.55),
-    0 0 82px 30px rgba(255, 118, 18, 0.2),
-    0 0 150px 58px rgba(200, 255, 50, 0.07);
-  transition: transform 0.28s ease, box-shadow 0.28s ease;
+    0 0 5px 2px rgba(255, 255, 236, 1),
+    0 0 18px 7px rgba(255, 231, 133, 0.92),
+    0 0 52px 20px rgba(255, 176, 35, 0.5),
+    0 0 118px 48px rgba(255, 119, 18, 0.19),
+    0 0 190px 82px rgba(200, 255, 50, 0.055);
+  transition: transform 0.28s ease, filter 0.28s ease;
 }
 .sun::before {
   position: absolute;
-  inset: -13px;
-  border: 1px solid rgba(255, 227, 117, 0.18);
+  top: 50%;
+  left: 50%;
+  width: 132px;
+  height: 132px;
   border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 5deg,
+    rgba(255, 252, 220, 0.62) 0deg 0.7deg,
+    transparent 0.7deg 11deg,
+    rgba(255, 206, 86, 0.23) 11deg 11.8deg,
+    transparent 11.8deg 25deg
+  );
   content: '';
-  animation: corona-pulse 3.2s ease-in-out infinite;
+  filter: blur(0.45px) drop-shadow(0 0 8px rgba(255, 204, 83, 0.55));
+  mask-image: radial-gradient(circle, #000 0 3%, rgba(0, 0, 0, 0.96) 4%, rgba(0, 0, 0, 0.55) 31%, transparent 72%);
+  transform: translate(-50%, -50%);
+  animation: light-rays 18s linear infinite, corona-pulse 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+.sun::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 230px;
+  height: 230px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 244, 179, 0.32) 0 2%, rgba(255, 181, 38, 0.16) 13%, rgba(255, 126, 16, 0.06) 35%, transparent 70%);
+  content: '';
+  transform: translate(-50%, -50%);
+  animation: light-bloom 3.2s ease-in-out infinite;
+  pointer-events: none;
 }
 .sun-surface {
   position: absolute;
-  inset: 0;
-  overflow: hidden;
-  border-radius: inherit;
-  background:
-    radial-gradient(circle at 36% 32%, rgba(255, 255, 222, 0.98) 0 7%, transparent 17%),
-    radial-gradient(circle at 67% 68%, rgba(255, 91, 0, 0.45) 0 6%, transparent 18%),
-    radial-gradient(circle at 48% 52%, #fff7a4 0 18%, #ffd34a 43%, #ff8a13 72%, #d94100 100%);
-  box-shadow: inset -8px -9px 13px rgba(134, 29, 0, 0.48), inset 5px 4px 11px rgba(255, 255, 221, 0.7);
-  animation: sun-surface 9s linear infinite;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 22%, #fffde8 38%, rgba(255, 236, 150, 0.78) 58%, transparent 76%);
+  filter: blur(0.2px);
+  transform: translate(-50%, -50%);
+  animation: light-core 2.4s ease-in-out infinite;
 }
 .solar-system.is-engaged .sun {
-  transform: translate(-50%, -50%) scale(1.07);
-  box-shadow: 0 0 16px 4px rgba(255, 247, 176, 1), 0 0 45px 17px rgba(255, 181, 37, 0.68), 0 0 105px 40px rgba(255, 108, 13, 0.28), 0 0 165px 66px rgba(200, 255, 50, 0.09);
+  transform: translate(-50%, -50%) scale(1.08);
+  filter: brightness(1.38);
 }
 .solar-caption,
 .timecode {
@@ -316,9 +345,10 @@ h2 em {
 .timecode { right: 4%; bottom: 11%; }
 
 .ticker { position: relative; z-index: 3; overflow: hidden; border-block: 1px solid var(--line); background: rgba(10, 12, 10, 0.72); }
-.ticker-track { display: flex; width: max-content; align-items: center; gap: 34px; padding: 18px 0; animation: ticker 24s linear infinite; }
-.ticker-track span { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; }
-.ticker-track b { color: var(--accent); font-weight: 400; }
+.ticker-track { display: flex; width: max-content; align-items: center; gap: 0; padding: 0; animation: ticker 24s linear infinite; will-change: transform; }
+.ticker-group { display: flex; flex-shrink: 0; align-items: center; gap: 34px; padding: 18px 34px 18px 0; }
+.ticker-group span { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; }
+.ticker-group b { color: var(--accent); font-weight: 400; }
 
 .portfolio { padding-block: 150px; background: linear-gradient(180deg, rgba(14, 16, 14, 0.58), rgba(7, 8, 7, 0.18)); }
 .section-heading { position: relative; }
@@ -335,6 +365,39 @@ h2 em {
 .video-frame::after { position: absolute; inset: 0; border: 1px solid rgba(255, 255, 255, 0.07); border-radius: inherit; content: ''; pointer-events: none; }
 .video-frame-wide { aspect-ratio: 16 / 9; }
 .video-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+.video-hit-layer {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #fff;
+}
+.video-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 999px;
+  background: rgba(4, 5, 4, 0.72);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.32);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+.video-hit-layer:hover .video-control { border-color: var(--accent); transform: scale(1.04); }
+.video-hit-layer.is-playing .video-control { opacity: 0; }
+.video-hit-layer.is-playing:hover .video-control,
+.video-hit-layer.is-playing:focus-visible .video-control { opacity: 1; }
+.video-control-icon { width: 10px; color: var(--accent); text-align: center; }
 .video-meta { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-top: 15px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; }
 .video-meta a { padding-bottom: 3px; border-bottom: 1px solid currentColor; }
 .video-meta a:hover { color: var(--accent); }
@@ -405,8 +468,10 @@ h2 em {
 .cursor-crosshair.is-clickable::after { opacity: 0; }
 
 @keyframes star-twinkle { 0%, 100% { opacity: calc(var(--opacity) * 0.55); transform: scale(0.82); } 50% { opacity: var(--opacity); transform: scale(1.15); } }
-@keyframes corona-pulse { 0%, 100% { opacity: 0.45; transform: scale(0.92); } 50% { opacity: 0.88; transform: scale(1.14); } }
-@keyframes sun-surface { to { transform: rotate(360deg); } }
+@keyframes corona-pulse { 0%, 100% { opacity: 0.64; } 50% { opacity: 1; } }
+@keyframes light-rays { to { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes light-bloom { 0%, 100% { opacity: 0.76; transform: translate(-50%, -50%) scale(0.92); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); } }
+@keyframes light-core { 0%, 100% { opacity: 0.9; transform: translate(-50%, -50%) scale(0.84); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.18); } }
 @keyframes ticker { to { transform: translateX(-50%); } }
 
 @media (max-width: 1080px) {
@@ -469,7 +534,7 @@ h2 em {
   .solar-system { width: calc(100% + 14px); margin-left: -7px; }
   .solar-caption { right: 2%; }
   .timecode { bottom: 8%; }
-  .ticker-track { gap: 24px; }
+  .ticker-group { gap: 24px; padding-right: 24px; }
   .portfolio,
   .about { padding-block: 100px; }
   .contact { padding-block: 100px 70px; }

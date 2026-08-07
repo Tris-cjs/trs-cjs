@@ -104,12 +104,15 @@ if (shortsGrid) {
     card.innerHTML = `
       <div class="video-frame short-frame">
         <iframe
-          src="https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1"
+          src="https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&enablejsapi=1&playsinline=1"
           title="${title}"
           loading="lazy"
           referrerpolicy="strict-origin-when-cross-origin"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowfullscreen></iframe>
+        <button class="video-hit-layer" type="button" aria-label="Play ${title}">
+          <span class="video-control"><span class="video-control-icon" aria-hidden="true">▶</span><span class="video-control-label">Play video</span></span>
+        </button>
       </div>
       <h3 class="short-title">${title}</h3>
       <a class="short-link" href="https://youtube.com/shorts/${id}" target="_blank" rel="noreferrer">${unlisted ? 'Open unlisted short' : 'Open short'} ↗</a>`;
@@ -119,6 +122,30 @@ if (shortsGrid) {
   shortsGrid.appendChild(fragment);
   shortsGrid.querySelectorAll('.reveal').forEach((item) => revealObserver.observe(item));
 }
+
+document.querySelectorAll('.video-frame').forEach((frame) => {
+  const iframe = frame.querySelector('iframe');
+  const hitLayer = frame.querySelector('.video-hit-layer');
+  if (!iframe || !hitLayer) return;
+
+  let playing = false;
+  const icon = hitLayer.querySelector('.video-control-icon');
+  const label = hitLayer.querySelector('.video-control-label');
+
+  hitLayer.addEventListener('click', () => {
+    playing = !playing;
+    iframe.contentWindow?.postMessage(JSON.stringify({
+      event: 'command',
+      func: playing ? 'playVideo' : 'pauseVideo',
+      args: [],
+    }), '*');
+
+    hitLayer.classList.toggle('is-playing', playing);
+    hitLayer.setAttribute('aria-label', `${playing ? 'Pause' : 'Play'} ${iframe.title}`);
+    if (icon) icon.textContent = playing ? 'Ⅱ' : '▶';
+    if (label) label.textContent = playing ? 'Pause video' : 'Play video';
+  });
+});
 
 const solarSystem = document.querySelector('#solar-system');
 const planetSystem = document.querySelector('#planet-system');
