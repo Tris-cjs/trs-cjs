@@ -277,6 +277,8 @@ h2 em {
   transition: filter 0.24s ease;
 }
 .solar-system.is-engaged .planet-sphere { filter: saturate(1.08) brightness(1.05); }
+.planet[data-logo-light="lift"] .planet-sphere { filter: brightness(1.14) saturate(1.04); }
+.solar-system.is-engaged .planet[data-logo-light="lift"] .planet-sphere { filter: brightness(1.19) saturate(1.1); }
 .planet-sphere img {
   position: relative;
   z-index: 1;
@@ -290,6 +292,9 @@ h2 em {
   height: 62%;
   mix-blend-mode: multiply;
   filter: saturate(1.18) contrast(1.06) drop-shadow(0 1px 2px rgba(255, 255, 255, 0.14));
+}
+.planet[data-logo-light="lift"] .planet-sphere img {
+  filter: brightness(1.42) saturate(1.14) contrast(0.82) drop-shadow(0 1px 3px rgba(255, 255, 255, 0.34));
 }
 .planet[data-logo-blend="screen"] .planet-sphere img {
   width: 64%;
@@ -458,11 +463,37 @@ h2 em {
 .video-meta { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-top: 15px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; }
 .video-meta a { padding-bottom: 3px; border-bottom: 1px solid currentColor; }
 .video-meta a:hover { color: var(--accent); }
+.shorts-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 34px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.shorts-toolbar-label { margin: 0; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
+.short-filters { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.short-filter {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(244, 245, 239, 0.025);
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: border-color 0.22s ease, background-color 0.22s ease, color 0.22s ease;
+}
+.short-filter span { color: rgba(244, 245, 239, 0.48); }
+.short-filter:hover { border-color: var(--line-strong); color: var(--ink); }
+.short-filter.is-active { border-color: rgba(200, 255, 50, 0.48); background: var(--accent-soft); color: var(--accent); }
+.short-filter.is-active span { color: currentColor; }
 .shorts-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 54px 22px; }
 .short-card { min-width: 0; content-visibility: auto; contain-intrinsic-size: 0 520px; }
+.short-card[hidden] { display: none; }
 .short-frame { aspect-ratio: 9 / 16; transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease; }
 .short-card:hover .short-frame { border-color: rgba(200, 255, 50, 0.42); box-shadow: 0 30px 74px rgba(0, 0, 0, 0.56), 0 0 0 1px rgba(200, 255, 50, 0.1); transform: translateY(-5px); }
 .short-title { margin: 15px 0 8px; font-size: 14px; font-weight: 500; letter-spacing: -0.03em; }
+.short-card-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.short-category { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 0.05em; text-transform: uppercase; }
 .short-link { color: var(--muted); font-family: 'DM Mono', monospace; font-size: 8px; text-transform: uppercase; }
 .short-link:hover { color: var(--accent); }
 
@@ -605,6 +636,8 @@ h2 em {
   .contact { padding-block: 100px 70px; }
   .featured-block { margin-bottom: 72px; }
   .section-bar { align-items: flex-start; flex-direction: column; }
+  .shorts-toolbar { align-items: flex-start; flex-direction: column; }
+  .short-filters { justify-content: flex-start; }
   .shorts-grid { gap: 42px 13px; }
   .video-frame { box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34); }
   .contact-layout { padding: 42px 24px; border-radius: 12px; }

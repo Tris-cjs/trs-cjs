@@ -104,29 +104,30 @@ if (starField) {
 }
 
 const shorts = [
-  ['gsOFUAuJ3Pc', 'GTA 6 Tidal System', false],
-  ['KgyFzMmVmF4', 'Make Sense', false],
-  ['GDHdmkyQ500', 'See You Again', false],
-  ['BkFptHb0MFc', 'GTA 6 Leak', false],
-  ['M1offHp1muc', 'Michael’s Car Reference', false],
-  ['MR5UlgWboSI', 'Franklin Is a Traitor', false],
-  ['CChpNWAgnFA', 'The GTA 6 Hacker', false],
-  ['WBtS4kjdC2o', 'Could This Be the Twist?', false],
-  ['49PbFTez5g8', 'GTA 6 Map in Minecraft', false],
-  ['WaIRZPtrgik', 'Early GTA 5 Hint', false],
-  ['TaiUWy3-MRc', 'Google Flow / 01', true],
-  ['J7Ckzlbz1K0', 'Google Flow / 02', true],
-  ['I5b3-CLgEz8', 'Google Flow / 03', true],
-  ['SqOGk9wZSuE', 'Google Flow / 04', true],
-  ['MUG-Dxo0IMo', 'Google Flow / 05', true],
+  { id: 'gsOFUAuJ3Pc', title: 'GTA 6 Tidal System', category: 'gaming', label: 'Gaming story' },
+  { id: 'KgyFzMmVmF4', title: 'Make Sense', category: 'cinematic', label: 'Cinematic edit' },
+  { id: 'GDHdmkyQ500', title: 'See You Again', category: 'cinematic', label: 'Cinematic edit' },
+  { id: 'BkFptHb0MFc', title: 'GTA 6 Leak', category: 'gaming', label: 'Gaming story' },
+  { id: 'M1offHp1muc', title: 'Michael’s Car Reference', category: 'gaming', label: 'Gaming story' },
+  { id: 'MR5UlgWboSI', title: 'Franklin Is a Traitor', category: 'gaming', label: 'Gaming story' },
+  { id: 'CChpNWAgnFA', title: 'The GTA 6 Hacker', category: 'gaming', label: 'Gaming story' },
+  { id: 'WBtS4kjdC2o', title: 'Could This Be the Twist?', category: 'gaming', label: 'Gaming story' },
+  { id: '49PbFTez5g8', title: 'GTA 6 Map in Minecraft', category: 'gaming', label: 'Gaming story' },
+  { id: 'WaIRZPtrgik', title: 'Early GTA 5 Hint', category: 'gaming', label: 'Gaming story' },
+  { id: 'TaiUWy3-MRc', title: 'Google Flow / 01', category: 'ai', label: 'AI experiment', unlisted: true },
+  { id: 'J7Ckzlbz1K0', title: 'Google Flow / 02', category: 'ai', label: 'AI experiment', unlisted: true },
+  { id: 'I5b3-CLgEz8', title: 'Google Flow / 03', category: 'ai', label: 'AI experiment', unlisted: true },
+  { id: 'SqOGk9wZSuE', title: 'Google Flow / 04', category: 'ai', label: 'AI experiment', unlisted: true },
+  { id: 'MUG-Dxo0IMo', title: 'Google Flow / 05', category: 'ai', label: 'AI experiment', unlisted: true },
 ];
 
 const shortsGrid = document.querySelector('#shorts-grid');
 if (shortsGrid) {
   const fragment = document.createDocumentFragment();
-  shorts.forEach(([id, title, unlisted], index) => {
+  shorts.forEach(({ id, title, category, label, unlisted = false }, index) => {
     const card = document.createElement('article');
     card.className = 'short-card reveal';
+    card.dataset.category = category;
     card.innerHTML = `
       <div class="video-frame short-frame" data-video-id="${id}" data-video-title="${title}">
         <img class="video-poster" src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" width="480" height="360" loading="lazy" decoding="async" fetchpriority="low" aria-hidden="true" onerror="this.remove()" />
@@ -135,13 +136,39 @@ if (shortsGrid) {
         </button>
       </div>
       <h3 class="short-title">${title}</h3>
-      <a class="short-link" href="https://youtube.com/shorts/${id}" target="_blank" rel="noreferrer">${unlisted ? 'Open unlisted short' : 'Open short'} ↗</a>`;
+      <div class="short-card-meta">
+        <span class="short-category">${label}</span>
+        <a class="short-link" href="https://youtube.com/shorts/${id}" target="_blank" rel="noreferrer">${unlisted ? 'Open unlisted short' : 'Open short'} ↗</a>
+      </div>`;
     card.style.transitionDelay = `${Math.min(index % 4, 3) * 55}ms`;
     fragment.appendChild(card);
   });
   shortsGrid.appendChild(fragment);
   shortsGrid.querySelectorAll('.reveal').forEach((item) => revealObserver.observe(item));
 }
+
+const shortFilterButtons = [...document.querySelectorAll('[data-short-filter]')];
+const shortsVisibleCount = document.querySelector('#shorts-visible-count');
+shortFilterButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    const filter = button.dataset.shortFilter;
+    let visibleCount = 0;
+
+    shortsGrid?.querySelectorAll('.short-card').forEach((card) => {
+      const visible = filter === 'all' || card.dataset.category === filter;
+      card.hidden = !visible;
+      if (!visible) card.querySelector('.video-frame')?.dispatchEvent(new Event('pause-video'));
+      if (visible) visibleCount += 1;
+    });
+
+    shortFilterButtons.forEach((item) => {
+      const active = item === button;
+      item.classList.toggle('is-active', active);
+      item.setAttribute('aria-pressed', String(active));
+    });
+    if (shortsVisibleCount) shortsVisibleCount.textContent = String(visibleCount);
+  });
+});
 
 document.querySelectorAll('.video-frame').forEach((frame) => {
   const hitLayer = frame.querySelector('.video-hit-layer');
@@ -151,6 +178,13 @@ document.querySelectorAll('.video-frame').forEach((frame) => {
   let playing = false;
   const icon = hitLayer.querySelector('.video-control-icon');
   const label = hitLayer.querySelector('.video-control-label');
+
+  const updateVideoControl = () => {
+    hitLayer.classList.toggle('is-playing', playing);
+    hitLayer.setAttribute('aria-label', `${playing ? 'Pause' : 'Play'} ${iframe?.title || frame.dataset.videoTitle || 'video'}`);
+    if (icon) icon.textContent = playing ? 'Ⅱ' : '▶';
+    if (label) label.textContent = playing ? 'Pause video' : 'Play video';
+  };
 
   hitLayer.addEventListener('click', () => {
     if (!iframe) {
@@ -177,10 +211,14 @@ document.querySelectorAll('.video-frame').forEach((frame) => {
       }), '*');
     }
 
-    hitLayer.classList.toggle('is-playing', playing);
-    hitLayer.setAttribute('aria-label', `${playing ? 'Pause' : 'Play'} ${iframe.title}`);
-    if (icon) icon.textContent = playing ? 'Ⅱ' : '▶';
-    if (label) label.textContent = playing ? 'Pause video' : 'Play video';
+    updateVideoControl();
+  });
+
+  frame.addEventListener('pause-video', () => {
+    if (!iframe || !playing) return;
+    iframe.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'pauseVideo', args: [] }), '*');
+    playing = false;
+    updateVideoControl();
   });
 });
 

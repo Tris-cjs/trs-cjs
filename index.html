@@ -8,7 +8,7 @@
     <meta name="description" content="Tristan is an experienced video editor crafting cinematic work with rhythm, emotion, and lasting impact for brands, creators, and campaigns." />
     <title>Tristan — Experienced Video Editor</title>
     <link rel="icon" type="image/png" href="Simple Tristan Video Editor Logo-Photoroom.png" />
-    <link rel="stylesheet" href="styles.css?v=20260818" />
+    <link rel="stylesheet" href="styles.css?v=20260819" />
     <script>document.documentElement.classList.add('js');</script>
   </head>
   <body>
@@ -55,7 +55,7 @@
             <div class="planet" data-name="CapCut" data-radius="70" data-speed="0.22" data-phase="0.20" data-size="36">
               <span class="planet-sphere"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Capcut-icon.svg" alt="CapCut" /></span>
             </div>
-            <div class="planet" data-name="Canva" data-radius="118" data-speed="-0.17" data-phase="1.65" data-size="40" data-logo-blend="multiply" data-logo-style="circle">
+            <div class="planet" data-name="Canva" data-radius="118" data-speed="-0.17" data-phase="1.65" data-size="40" data-logo-blend="multiply" data-logo-style="circle" data-logo-light="lift">
               <span class="planet-sphere"><img src="assets/canva-logo.png" alt="Canva" /></span>
             </div>
             <div class="planet" data-name="DaVinci Resolve" data-radius="166" data-speed="0.14" data-phase="3.15" data-size="44" data-logo-style="tile">
@@ -70,13 +70,13 @@
             <div class="planet" data-name="Final Cut Pro" data-radius="310" data-speed="-0.074" data-phase="2.40" data-size="50">
               <span class="planet-sphere"><img src="https://commons.wikimedia.org/wiki/Special:FilePath/FinalCutProACS2026.png" alt="Final Cut Pro" /></span>
             </div>
-            <div class="planet" data-name="HeyGen" data-radius="94" data-speed="-0.195" data-phase="2.918" data-size="34" data-logo-blend="multiply">
+            <div class="planet" data-name="HeyGen" data-radius="94" data-speed="-0.195" data-phase="2.918" data-size="34" data-logo-blend="multiply" data-logo-light="lift">
               <span class="planet-sphere"><img src="assets/heygen-logo.png" alt="HeyGen" /></span>
             </div>
             <div class="planet" data-name="Google Flow" data-radius="142" data-speed="0.158" data-phase="2.7091" data-size="35" data-logo-blend="screen">
               <span class="planet-sphere"><img src="assets/google-flow-logo.png" alt="Google Flow" /></span>
             </div>
-            <div class="planet" data-name="Nano Banana" data-radius="190" data-speed="-0.132" data-phase="3.4026" data-size="36" data-logo-blend="multiply">
+            <div class="planet" data-name="Nano Banana" data-radius="190" data-speed="-0.132" data-phase="3.4026" data-size="36" data-logo-blend="multiply" data-logo-light="lift">
               <span class="planet-sphere"><img src="assets/nano-banana-logo.png" alt="Nano Banana" /></span>
             </div>
             <div class="planet" data-name="Photoshop" data-radius="238" data-speed="0.106" data-phase="0.2486" data-size="40" data-logo-style="tile">
@@ -118,6 +118,15 @@
           </div>
 
           <div class="shorts-block">
+            <div class="shorts-toolbar reveal">
+              <p class="shorts-toolbar-label"><span id="shorts-visible-count">15</span> short-form pieces</p>
+              <div class="short-filters" role="group" aria-label="Filter short-form videos by category">
+                <button class="short-filter is-active" type="button" data-short-filter="all" aria-pressed="true">All <span>15</span></button>
+                <button class="short-filter" type="button" data-short-filter="gaming" aria-pressed="false">Gaming Stories <span>8</span></button>
+                <button class="short-filter" type="button" data-short-filter="cinematic" aria-pressed="false">Cinematic Edits <span>2</span></button>
+                <button class="short-filter" type="button" data-short-filter="ai" aria-pressed="false">AI Experiments <span>5</span></button>
+              </div>
+            </div>
             <div class="shorts-grid" id="shorts-grid" aria-live="polite"></div>
           </div>
         </div>
@@ -149,6 +158,6 @@
     </footer>
 
     <noscript><p class="noscript">JavaScript is required for the interactive solar system and video gallery.</p></noscript>
-    <script src="script.js?v=20260818"></script>
+    <script src="script.js?v=20260819"></script>
   </body>
 </html>
