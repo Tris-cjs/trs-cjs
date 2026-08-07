@@ -82,19 +82,22 @@ if (tickerTrack && tickerGroups.length === 2) {
 
 const starField = document.querySelector('#site-stars');
 if (starField) {
-  const starCount = window.innerWidth < 700 ? 46 : 78;
+  const starCount = window.innerWidth < 700 ? 54 : 96;
   const fragment = document.createDocumentFragment();
   for (let index = 0; index < starCount; index += 1) {
     const star = document.createElement('span');
-    const noticeable = index % 13 === 0;
-    const size = noticeable ? 1.8 + Math.random() * 1.2 : 0.6 + Math.random() * 1.2;
-    star.className = `site-star${noticeable ? ' is-noticeable' : ''}`;
+    const glitter = index % 17 === 5;
+    const noticeable = index % 13 === 0 || glitter;
+    const size = noticeable ? 1.7 + Math.random() * 1.15 : 0.55 + Math.random() * 1.15;
+    star.className = `site-star${noticeable ? ' is-noticeable' : ''}${glitter ? ' is-glitter' : ''}`;
     star.style.left = `${Math.random() * 100}%`;
     star.style.top = `${Math.random() * 100}%`;
     star.style.setProperty('--size', `${size}px`);
     star.style.setProperty('--opacity', noticeable ? `${0.46 + Math.random() * 0.28}` : `${0.08 + Math.random() * 0.2}`);
     star.style.setProperty('--twinkle', `${4.2 + Math.random() * 6.8}s`);
     star.style.setProperty('--delay', `${-Math.random() * 8}s`);
+    star.style.setProperty('--glitter', `${6.8 + Math.random() * 5.4}s`);
+    star.style.setProperty('--glitter-delay', `${-Math.random() * 10}s`);
     fragment.appendChild(star);
   }
   starField.appendChild(fragment);
