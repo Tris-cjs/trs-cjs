@@ -177,6 +177,15 @@ const planets = [...document.querySelectorAll('.planet')];
 const particleCanvas = document.querySelector('#particle-field');
 const particleContext = particleCanvas?.getContext('2d');
 
+const orbitProfiles = [
+  { tilt: -12, tiltRange: 3.2, pivotSpeed: 0.052, pivotPhase: 0.4, pivotDirection: 1, flatten: 0.50, flattenRange: 0.018, flattenSpeed: 0.039 },
+  { tilt: -5, tiltRange: 4.4, pivotSpeed: 0.043, pivotPhase: 1.6, pivotDirection: -1, flatten: 0.47, flattenRange: 0.024, flattenSpeed: 0.034 },
+  { tilt: 7, tiltRange: 3.7, pivotSpeed: 0.047, pivotPhase: 2.7, pivotDirection: 1, flatten: 0.52, flattenRange: 0.019, flattenSpeed: 0.037 },
+  { tilt: -9, tiltRange: 5.1, pivotSpeed: 0.036, pivotPhase: 3.8, pivotDirection: -1, flatten: 0.48, flattenRange: 0.022, flattenSpeed: 0.031 },
+  { tilt: 4, tiltRange: 4.2, pivotSpeed: 0.041, pivotPhase: 5.1, pivotDirection: 1, flatten: 0.51, flattenRange: 0.02, flattenSpeed: 0.035 },
+  { tilt: -2, tiltRange: 5.8, pivotSpeed: 0.032, pivotPhase: 0.9, pivotDirection: -1, flatten: 0.49, flattenRange: 0.025, flattenSpeed: 0.029 },
+];
+
 const solarState = {
   width: 0,
   height: 0,
@@ -185,6 +194,7 @@ const solarState = {
   pointerY: 0,
   pointerActive: false,
   particles: [],
+  orbitRings: [],
   start: performance.now(),
 };
 
@@ -216,8 +226,10 @@ function sizeSolarSystem() {
   });
 
   orbitRings?.replaceChildren();
+  solarState.orbitRings = [];
   planets.forEach((planet, index) => {
     const radius = Number(planet.dataset.radius) * solarState.scale;
+    const profile = orbitProfiles[index % orbitProfiles.length];
     const size = Math.max(24, Number(planet.dataset.size) * solarState.scale);
     planet.style.setProperty('--planet-size', `${size}px`);
     planet.title = planet.dataset.name || '';
@@ -226,9 +238,11 @@ function sizeSolarSystem() {
       const ring = document.createElement('span');
       ring.className = 'orbit-ring';
       ring.style.width = `${radius * 2}px`;
-      ring.style.height = `${radius * 0.98}px`;
+      ring.style.height = `${radius * 2 * profile.flatten}px`;
+      ring.style.transform = `translate(-50%, -50%) rotate(${profile.tilt}deg)`;
       ring.style.setProperty('--ring-opacity', String(0.1 + index * 0.018));
       orbitRings.appendChild(ring);
+      solarState.orbitRings[index] = ring;
     }
   });
 }
@@ -279,15 +293,22 @@ function animateSolarSystem(time) {
   const pointerLightX = solarState.pointerActive ? solarState.pointerX * 3 : 0;
   const pointerLightY = solarState.pointerActive ? solarState.pointerY * 3 : 0;
 
-  planets.forEach((planet) => {
+  planets.forEach((planet, index) => {
     const radius = Number(planet.dataset.radius) * solarState.scale;
+    const profile = orbitProfiles[index % orbitProfiles.length];
     const speed = Number(planet.dataset.speed);
     const phase = Number(planet.dataset.phase);
     const angle = phase + elapsed * speed;
     const cosine = Math.cos(angle);
     const sine = Math.sin(angle);
-    const x = cosine * radius;
-    const y = sine * radius * 0.49;
+    const pivot = Math.sin(elapsed * profile.pivotSpeed * profile.pivotDirection + profile.pivotPhase);
+    const tilt = profile.tilt + pivot * profile.tiltRange;
+    const flattening = profile.flatten + Math.sin(elapsed * profile.flattenSpeed + profile.pivotPhase * 1.7) * profile.flattenRange;
+    const tiltRadians = tilt * Math.PI / 180;
+    const localX = cosine * radius;
+    const localY = sine * radius * flattening;
+    const x = localX * Math.cos(tiltRadians) - localY * Math.sin(tiltRadians);
+    const y = localX * Math.sin(tiltRadians) + localY * Math.cos(tiltRadians);
     const depth = sine;
     const depthScale = 0.82 + (depth + 1) * 0.11;
     const vectorLength = Math.max(1, Math.hypot(x, y));
@@ -304,6 +325,12 @@ function animateSolarSystem(time) {
     const highlightX = towardSunX * 6;
     const highlightY = towardSunY * 6;
     const warmGlow = 0.08 + Math.max(0, 1 - radius / (310 * solarState.scale)) * 0.17;
+    const ring = solarState.orbitRings[index];
+
+    if (ring) {
+      ring.style.height = `${radius * 2 * flattening}px`;
+      ring.style.transform = `translate(-50%, -50%) rotate(${tilt}deg)`;
+    }
 
     planet.style.setProperty('--planet-x', `${x}px`);
     planet.style.setProperty('--planet-y', `${y}px`);

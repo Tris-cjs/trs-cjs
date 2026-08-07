@@ -223,7 +223,9 @@ h2 em {
   left: 50%;
   border: 1px solid rgba(210, 231, 177, var(--ring-opacity));
   border-radius: 50%;
-  transform: translate(-50%, -50%) rotate(-11deg);
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+  will-change: width, height, transform;
 }
 .planet-system { position: absolute; z-index: 5; inset: 0; pointer-events: none; transform-style: preserve-3d; }
 .planet {
@@ -268,55 +270,47 @@ h2 em {
   z-index: 4;
   top: 50%;
   left: 50%;
-  width: 3px;
-  height: 3px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   transform: translate(-50%, -50%);
   background: #fff;
-  filter: brightness(1.45);
+  filter: brightness(1.38);
   box-shadow:
-    0 0 4px 2px rgba(255, 255, 255, 1),
-    0 0 13px 6px rgba(255, 242, 205, 1),
-    0 0 38px 14px rgba(255, 185, 92, 0.82),
-    0 0 88px 34px rgba(255, 82, 39, 0.36),
-    0 0 168px 74px rgba(204, 39, 21, 0.14);
-  transition: transform 0.28s ease, filter 0.28s ease;
+    0 0 6px 3px rgba(255, 255, 255, 1),
+    0 0 19px 9px rgba(255, 246, 218, 0.98),
+    0 0 52px 22px rgba(255, 185, 99, 0.68),
+    0 0 118px 52px rgba(255, 79, 40, 0.3),
+    0 0 218px 102px rgba(184, 35, 23, 0.13);
 }
 .sun::before {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 174px;
-  height: 174px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
-  background: repeating-conic-gradient(
-    from 5deg,
-    rgba(255, 255, 245, 0.72) 0deg 0.55deg,
-    transparent 0.55deg 8deg,
-    rgba(255, 170, 98, 0.3) 8deg 8.8deg,
-    transparent 8.8deg 21deg
-  );
+  background: radial-gradient(circle, rgba(255, 255, 250, 0.92) 0 4%, rgba(255, 239, 211, 0.4) 17%, rgba(255, 154, 91, 0.15) 44%, transparent 72%);
   content: '';
-  filter: blur(0.5px) drop-shadow(0 0 9px rgba(255, 126, 66, 0.62));
-  mask-image: radial-gradient(circle, #000 0 3%, rgba(0, 0, 0, 0.96) 6%, rgba(0, 0, 0, 0.68) 33%, transparent 75%);
+  filter: blur(1px) drop-shadow(0 0 12px rgba(255, 151, 92, 0.5));
   transform: translate(-50%, -50%);
-  animation: light-rays 18s linear infinite, corona-pulse 3.2s ease-in-out infinite;
   pointer-events: none;
 }
 .sun::after {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 314px;
-  height: 314px;
+  width: 392px;
+  height: 348px;
   border-radius: 50%;
   background:
-    radial-gradient(ellipse at 57% 42%, rgba(255, 206, 126, 0.2) 0 7%, transparent 27%),
-    radial-gradient(ellipse at 42% 61%, rgba(214, 35, 24, 0.27) 0 15%, transparent 46%),
-    radial-gradient(circle, rgba(255, 248, 214, 0.42) 0 2%, rgba(255, 117, 59, 0.24) 13%, rgba(190, 28, 18, 0.13) 38%, transparent 70%);
+    radial-gradient(ellipse at 58% 39%, rgba(255, 220, 154, 0.18) 0 8%, transparent 30%),
+    radial-gradient(ellipse at 37% 63%, rgba(215, 43, 27, 0.25) 0 17%, transparent 49%),
+    radial-gradient(ellipse at 51% 50%, rgba(255, 239, 204, 0.34) 0 3%, rgba(255, 111, 62, 0.2) 17%, rgba(174, 30, 22, 0.12) 43%, transparent 72%);
   content: '';
+  filter: blur(5px);
+  opacity: 0.92;
   transform: translate(-50%, -50%);
-  animation: light-bloom 3.2s ease-in-out infinite;
   pointer-events: none;
 }
 .sun-surface {
@@ -324,48 +318,32 @@ h2 em {
   z-index: 2;
   top: 50%;
   left: 50%;
-  width: 21px;
-  height: 21px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: radial-gradient(circle, #fff 0 25%, #fffdf2 39%, rgba(255, 220, 187, 0.94) 55%, rgba(255, 83, 47, 0.36) 72%, transparent 79%);
-  filter: blur(0.35px) drop-shadow(0 0 8px rgba(255, 238, 217, 1));
+  background: radial-gradient(circle, #fff 0 22%, #fffef7 36%, rgba(255, 237, 211, 0.96) 51%, rgba(255, 151, 96, 0.52) 67%, transparent 79%);
+  filter: blur(0.4px) drop-shadow(0 0 11px rgba(255, 239, 216, 0.96));
   transform: translate(-50%, -50%);
-  animation: light-core 2.4s ease-in-out infinite;
 }
 .sun-surface::before {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 272px;
-  height: 214px;
+  width: 338px;
+  height: 272px;
   border-radius: 46% 54% 57% 43% / 51% 39% 61% 49%;
   background:
-    radial-gradient(ellipse at 38% 44%, rgba(255, 64, 37, 0.24) 0 19%, transparent 50%),
-    radial-gradient(ellipse at 63% 58%, rgba(255, 150, 70, 0.19) 0 12%, transparent 43%),
-    conic-gradient(from 28deg, transparent, rgba(177, 28, 20, 0.14), transparent 25%, rgba(255, 92, 38, 0.18), transparent 57%, rgba(255, 188, 103, 0.12), transparent 83%);
+    radial-gradient(ellipse at 35% 43%, rgba(255, 61, 38, 0.22) 0 20%, transparent 53%),
+    radial-gradient(ellipse at 66% 59%, rgba(255, 151, 79, 0.17) 0 14%, transparent 46%),
+    radial-gradient(ellipse at 51% 51%, rgba(170, 29, 21, 0.13) 0 30%, transparent 69%);
   content: '';
-  filter: blur(20px);
+  filter: blur(28px);
+  opacity: 0.88;
   transform: translate(-50%, -50%) rotate(-12deg);
-  animation: nebula-drift 10s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-.sun-surface::after {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 108px;
-  height: 108px;
-  background:
-    linear-gradient(90deg, transparent 48.8%, rgba(255, 244, 230, 0.75) 49.7% 50.3%, transparent 51.2%),
-    linear-gradient(0deg, transparent 48.8%, rgba(255, 244, 230, 0.75) 49.7% 50.3%, transparent 51.2%);
-  content: '';
-  filter: blur(0.7px) drop-shadow(0 0 5px rgba(255, 156, 106, 0.8));
-  opacity: 0.72;
-  transform: translate(-50%, -50%) rotate(17deg);
   pointer-events: none;
 }
 .solar-system.is-engaged .sun {
-  transform: translate(-50%, -50%) scale(1.08);
+  transform: translate(-50%, -50%);
   filter: brightness(1.38);
 }
 .solar-caption,
@@ -506,11 +484,6 @@ h2 em {
 .cursor-crosshair.is-clickable::after { opacity: 0; }
 
 @keyframes star-twinkle { 0%, 100% { opacity: calc(var(--opacity) * 0.55); transform: scale(0.82); } 50% { opacity: var(--opacity); transform: scale(1.15); } }
-@keyframes corona-pulse { 0%, 100% { opacity: 0.64; } 50% { opacity: 1; } }
-@keyframes light-rays { to { transform: translate(-50%, -50%) rotate(360deg); } }
-@keyframes light-bloom { 0%, 100% { opacity: 0.76; transform: translate(-50%, -50%) scale(0.92); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); } }
-@keyframes light-core { 0%, 100% { opacity: 0.9; transform: translate(-50%, -50%) scale(0.84); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.18); } }
-@keyframes nebula-drift { 0% { opacity: 0.66; transform: translate(-50%, -50%) rotate(-12deg) scale(0.9); } 100% { opacity: 1; transform: translate(-50%, -50%) rotate(8deg) scale(1.1); } }
 @keyframes ticker { to { transform: translateX(-50%); } }
 
 @media (max-width: 1080px) {
