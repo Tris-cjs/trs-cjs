@@ -278,6 +278,11 @@ h2 em {
   mix-blend-mode: screen;
   filter: saturate(1.16) brightness(1.07) drop-shadow(0 0 3px rgba(255, 255, 255, 0.22));
 }
+.planet[data-logo-style="circle"] .planet-sphere img {
+  width: 62%;
+  height: 62%;
+  border-radius: 50%;
+}
 .planet[data-logo-style="tile"] .planet-sphere img {
   width: 59%;
   height: 59%;
