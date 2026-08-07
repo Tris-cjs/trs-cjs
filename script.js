@@ -57,6 +57,29 @@ window.addEventListener('scroll', updateActiveSection, { passive: true });
 
 document.querySelector('#year').textContent = new Date().getFullYear();
 
+const tickerTrack = document.querySelector('.ticker-track');
+const tickerGroups = tickerTrack ? [...tickerTrack.querySelectorAll('.ticker-group')] : [];
+if (tickerTrack && tickerGroups.length === 2) {
+  const tickerSeed = tickerGroups[0].innerHTML;
+  let tickerResizeTimer;
+
+  const fillTicker = () => {
+    tickerGroups.forEach((group) => { group.innerHTML = tickerSeed; });
+    const seedWidth = Math.max(1, tickerGroups[0].getBoundingClientRect().width);
+    const repeats = Math.max(2, Math.ceil(window.innerWidth / seedWidth) + 1);
+    const repeatedWords = tickerSeed.repeat(repeats);
+    tickerGroups.forEach((group) => { group.innerHTML = repeatedWords; });
+    const loopWidth = tickerGroups[0].getBoundingClientRect().width;
+    tickerTrack.style.setProperty('--ticker-duration', `${Math.max(18, loopWidth / 56)}s`);
+  };
+
+  fillTicker();
+  window.addEventListener('resize', () => {
+    window.clearTimeout(tickerResizeTimer);
+    tickerResizeTimer = window.setTimeout(fillTicker, 140);
+  }, { passive: true });
+}
+
 const starField = document.querySelector('#site-stars');
 if (starField) {
   const starCount = window.innerWidth < 700 ? 46 : 78;
@@ -253,8 +276,8 @@ function drawParticles(time) {
 
 function animateSolarSystem(time) {
   const elapsed = reduceMotion ? 0 : (time - solarState.start) / 1000;
-  const pointerLightX = solarState.pointerActive ? solarState.pointerX * 5 : 0;
-  const pointerLightY = solarState.pointerActive ? solarState.pointerY * 5 : 0;
+  const pointerLightX = solarState.pointerActive ? solarState.pointerX * 3 : 0;
+  const pointerLightY = solarState.pointerActive ? solarState.pointerY * 3 : 0;
 
   planets.forEach((planet) => {
     const radius = Number(planet.dataset.radius) * solarState.scale;
@@ -267,10 +290,20 @@ function animateSolarSystem(time) {
     const y = sine * radius * 0.49;
     const depth = sine;
     const depthScale = 0.82 + (depth + 1) * 0.11;
-    const lightX = 50 - cosine * 30 + pointerLightX;
-    const lightY = 50 - sine * 22 + pointerLightY;
-    const shadowX = cosine * 9;
-    const shadowY = sine * 7;
+    const vectorLength = Math.max(1, Math.hypot(x, y));
+    const outwardX = x / vectorLength;
+    const outwardY = y / vectorLength;
+    const towardSunX = -outwardX;
+    const towardSunY = -outwardY;
+    const lightX = 50 + towardSunX * 38 + pointerLightX;
+    const lightY = 50 + towardSunY * 38 + pointerLightY;
+    const shadowX = outwardX * 11;
+    const shadowY = outwardY * 11;
+    const shadeX = outwardX * 10;
+    const shadeY = outwardY * 10;
+    const highlightX = towardSunX * 6;
+    const highlightY = towardSunY * 6;
+    const warmGlow = 0.08 + Math.max(0, 1 - radius / (310 * solarState.scale)) * 0.17;
 
     planet.style.setProperty('--planet-x', `${x}px`);
     planet.style.setProperty('--planet-y', `${y}px`);
@@ -280,6 +313,11 @@ function animateSolarSystem(time) {
     planet.style.setProperty('--light-y', `${lightY}%`);
     planet.style.setProperty('--shadow-x', `${shadowX}px`);
     planet.style.setProperty('--shadow-y', `${shadowY}px`);
+    planet.style.setProperty('--shade-x', `${shadeX}px`);
+    planet.style.setProperty('--shade-y', `${shadeY}px`);
+    planet.style.setProperty('--highlight-x', `${highlightX}px`);
+    planet.style.setProperty('--highlight-y', `${highlightY}px`);
+    planet.style.setProperty('--warm-glow', warmGlow.toFixed(3));
     planet.style.zIndex = String(10 + Math.round((depth + 1) * 20));
   });
 
