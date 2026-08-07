@@ -1,461 +1,317 @@
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const finePointer = window.matchMedia('(pointer: fine)').matches;
+
 const menuToggle = document.querySelector('#menu-toggle');
 const navLinks = document.querySelector('#nav-links');
-const themeToggle = document.querySelector('#theme-toggle');
-
-let pageEnterTransition = 'zoom-in';
-try {
-  pageEnterTransition = sessionStorage.getItem('tristan-page-transition') || 'zoom-in';
-  sessionStorage.removeItem('tristan-page-transition');
-} catch (error) {
-  pageEnterTransition = 'zoom-in';
-}
-document.body.classList.add(`page-enter-${pageEnterTransition}`);
-
-document.querySelectorAll('a[data-transition]').forEach((link) => {
-  link.addEventListener('click', (event) => {
-    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    const href = link.getAttribute('href');
-    if (!href || href.startsWith('#') || href.startsWith('mailto:') || link.target === '_blank') return;
-
-    const target = new URL(href, window.location.href);
-    if (target.origin !== window.location.origin || target.pathname === window.location.pathname) return;
-
-    event.preventDefault();
-    const transition = link.dataset.transition || 'zoom-in';
-    try { sessionStorage.setItem('tristan-page-transition', transition); } catch (error) { /* Continue without saved transition state. */ }
-    document.body.classList.add(`page-exit-${transition}`);
-    window.setTimeout(() => { window.location.assign(target.href); }, 520);
-  });
-});
+const siteHeader = document.querySelector('#site-header');
 
 menuToggle?.addEventListener('click', () => {
-  const isOpen = navLinks.classList.toggle('open');
-  menuToggle.classList.toggle('open', isOpen);
-  menuToggle.setAttribute('aria-expanded', String(isOpen));
-  menuToggle.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+  const open = menuToggle.getAttribute('aria-expanded') !== 'true';
+  menuToggle.setAttribute('aria-expanded', String(open));
+  menuToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  menuToggle.classList.toggle('is-open', open);
+  navLinks?.classList.toggle('is-open', open);
 });
 
 navLinks?.querySelectorAll('a').forEach((link) => {
   link.addEventListener('click', () => {
-    navLinks.classList.remove('open');
-    menuToggle.classList.remove('open');
-    menuToggle.setAttribute('aria-expanded', 'false');
+    navLinks.querySelectorAll('a').forEach((item) => item.classList.toggle('is-active', item === link));
+    menuToggle?.setAttribute('aria-expanded', 'false');
+    menuToggle?.setAttribute('aria-label', 'Open menu');
+    menuToggle?.classList.remove('is-open');
+    navLinks.classList.remove('is-open');
   });
 });
 
-const storedTheme = localStorage.getItem('tristan-theme');
-if (storedTheme === 'dark') document.body.classList.add('dark');
-const initialDark = document.body.classList.contains('dark');
-themeToggle?.setAttribute('aria-checked', String(initialDark));
-themeToggle?.setAttribute('aria-label', initialDark ? 'Switch to light mode' : 'Switch to dark mode');
-
-themeToggle?.addEventListener('click', () => {
-  const isDark = document.body.classList.toggle('dark');
-  localStorage.setItem('tristan-theme', isDark ? 'dark' : 'light');
-  themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
-  themeToggle.setAttribute('aria-checked', String(isDark));
-});
-
-const particleCanvas = document.querySelector('#particle-field');
-const particleContext = particleCanvas?.getContext('2d');
-const heroReel = document.querySelector('.hero-reel');
-const particleField = {
-  width: 0,
-  height: 0,
-  points: [],
-  pointer: { x: 0, y: 0, active: false },
-};
-
-function createParticlePoints() {
-  if (!particleCanvas) return;
-  const centerX = particleField.width / 2;
-  const centerY = particleField.height / 2;
-  const spread = Math.min(particleField.width, particleField.height) * 0.25;
-  const count = Math.min(360, Math.max(180, Math.round((particleField.width * particleField.height) / 720)));
-
-  particleField.points = Array.from({ length: count }, () => {
-    const angle = Math.random() * Math.PI * 2;
-    const distance = Math.pow(Math.random(), 0.58) * spread;
-    return {
-      baseX: centerX + Math.cos(angle) * distance,
-      baseY: centerY + Math.sin(angle) * distance * 0.78,
-      drift: 1 + Math.random() * 3,
-      phase: Math.random() * Math.PI * 2,
-      size: 0.7 + Math.random() * 1.4,
-      opacity: 0.42 + Math.random() * 0.5,
-    };
-  });
-}
-
-function resizeParticleField() {
-  if (!particleCanvas || !particleContext) return;
-  const bounds = particleCanvas.getBoundingClientRect();
-  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-  particleField.width = bounds.width;
-  particleField.height = bounds.height;
-  particleCanvas.width = Math.round(bounds.width * pixelRatio);
-  particleCanvas.height = Math.round(bounds.height * pixelRatio);
-  particleContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-  createParticlePoints();
-}
-
-function drawParticles(time) {
-  if (!particleCanvas || !particleContext) return;
-  particleContext.clearRect(0, 0, particleField.width, particleField.height);
-  const isDarkMode = document.body.classList.contains('dark');
-
-  particleField.points.forEach((point) => {
-    let x = point.baseX + Math.sin(time * 0.0007 + point.phase) * point.drift;
-    let y = point.baseY + Math.cos(time * 0.00055 + point.phase) * point.drift;
-    const deltaX = particleField.pointer.x - x;
-    const deltaY = particleField.pointer.y - y;
-    const distance = Math.hypot(deltaX, deltaY);
-    const influence = particleField.pointer.active ? Math.max(0, 1 - distance / 78) : 0;
-
-    if (influence > 0) {
-      const push = influence * 13;
-      x -= (deltaX / Math.max(distance, 1)) * push;
-      y -= (deltaY / Math.max(distance, 1)) * push;
-    }
-
-    particleContext.beginPath();
-    particleContext.arc(x, y, point.size + influence * 1.1, 0, Math.PI * 2);
-    particleContext.fillStyle = influence > 0.12
-      ? `rgba(217, 255, 66, ${0.42 + influence * 0.58})`
-      : isDarkMode
-        ? `rgba(184, 184, 178, ${point.opacity})`
-        : `rgba(17, 17, 17, ${point.opacity})`;
-    particleContext.fill();
-  });
-
-  requestAnimationFrame(drawParticles);
-}
-
-if (particleCanvas && particleContext) {
-  resizeParticleField();
-  window.addEventListener('resize', resizeParticleField, { passive: true });
-  const updateParticlePointer = (event) => {
-    const bounds = particleCanvas.getBoundingClientRect();
-    particleField.pointer.x = event.clientX - bounds.left;
-    particleField.pointer.y = event.clientY - bounds.top;
-    particleField.pointer.active = true;
-  };
-  (heroReel || particleCanvas).addEventListener('pointerenter', updateParticlePointer);
-  (heroReel || particleCanvas).addEventListener('pointermove', updateParticlePointer);
-  (heroReel || particleCanvas).addEventListener('pointerleave', () => { particleField.pointer.active = false; });
-  requestAnimationFrame(drawParticles);
-}
-
-const orbitStates = [...document.querySelectorAll('.orbit-path')].map((path) => ({
-  path,
-  logo: path.querySelector('.orbit-logo'),
-  radius: parseFloat(getComputedStyle(path).getPropertyValue('--radius')) || 180,
-  scale: parseFloat(getComputedStyle(path).getPropertyValue('--orbit-scale')) || 1,
-  angle: Math.random() * Math.PI * 2,
-  travel: Math.random() * Math.PI * 2,
-  velocity: 0,
-  direction: 1,
-  radiusY: 0.72,
-  offsetX: 0,
-  offsetY: 0,
-  velocityX: 0,
-  velocityY: 0,
-  lastTime: 0,
-}));
-
-function randomizeOrbitVelocity(orbit) {
-  orbit.direction = Math.random() < 0.5 ? -1 : 1;
-  orbit.velocity = orbit.direction * (0.00028 + Math.random() * 0.00042);
-  orbit.radiusY = 0.66 + Math.random() * 0.2;
-}
-
-function getOrbitBasePosition(orbit) {
-  return {
-    x: Math.cos(orbit.angle) * orbit.radius * orbit.scale,
-    y: Math.sin(orbit.angle) * orbit.radius * orbit.radiusY * orbit.scale,
-  };
-}
-
-function renderOrbit(orbit, x, y) {
-  const depth = Math.sin(orbit.angle);
-  const scale = 0.8 + ((depth + 1) / 2) * 0.24;
-  const opacity = 0.76 + ((depth + 1) / 2) * 0.24;
-
-  orbit.path.style.transform = `translate(-50%, -50%) translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${(depth * 40 * orbit.scale).toFixed(2)}px)`;
-  orbit.path.style.zIndex = depth > 0 ? '3' : '1';
-  orbit.logo.style.transform = `translate(-50%, -50%) scale(${scale.toFixed(3)})`;
-  orbit.logo.style.opacity = opacity.toFixed(3);
-}
-
-function updateOrbitInteractions(step) {
-  const positions = orbitStates.map((orbit) => {
-    const base = getOrbitBasePosition(orbit);
-    return { orbit, x: base.x + orbit.offsetX, y: base.y + orbit.offsetY };
-  });
-  const pointerX = particleField.pointer.x - particleField.width / 2;
-  const pointerY = particleField.pointer.y - particleField.height / 2;
-
-  positions.forEach(({ orbit, x, y }) => {
-    if (particleField.pointer.active) {
-      const deltaX = x - pointerX;
-      const deltaY = y - pointerY;
-      const distance = Math.hypot(deltaX, deltaY);
-      const repelRadius = 132;
-
-      if (distance < repelRadius) {
-        const falloff = (repelRadius - distance) / repelRadius;
-        const strength = falloff * 2.8 * step;
-        orbit.velocityX += (deltaX / Math.max(distance, 1)) * strength;
-        orbit.velocityY += (deltaY / Math.max(distance, 1)) * strength;
-      }
-    }
-  });
-
-  for (let first = 0; first < positions.length; first += 1) {
-    for (let second = first + 1; second < positions.length; second += 1) {
-      const a = positions[first];
-      const b = positions[second];
-      const deltaX = a.x - b.x;
-      const deltaY = a.y - b.y;
-      const distance = Math.hypot(deltaX, deltaY);
-      const minimumDistance = 76 * ((a.orbit.logo.offsetWidth / 76) + (b.orbit.logo.offsetWidth / 76)) / 2;
-
-      if (distance < minimumDistance) {
-        const overlap = minimumDistance - distance;
-        const normalX = deltaX / Math.max(distance, 1);
-        const normalY = deltaY / Math.max(distance, 1);
-        const impulse = overlap * 0.085 * step;
-        a.orbit.velocityX += normalX * impulse;
-        a.orbit.velocityY += normalY * impulse;
-        b.orbit.velocityX -= normalX * impulse;
-        b.orbit.velocityY -= normalY * impulse;
-      }
-    }
-  }
-
-  orbitStates.forEach((orbit) => {
-    orbit.velocityX += -orbit.offsetX * 0.018 * step;
-    orbit.velocityY += -orbit.offsetY * 0.018 * step;
-    orbit.velocityX *= Math.pow(0.84, step);
-    orbit.velocityY *= Math.pow(0.84, step);
-    orbit.offsetX = Math.max(-78, Math.min(78, orbit.offsetX + orbit.velocityX * step));
-    orbit.offsetY = Math.max(-78, Math.min(78, orbit.offsetY + orbit.velocityY * step));
-  });
-}
-
-if (orbitStates.length) {
-  orbitStates.forEach((orbit) => {
-    randomizeOrbitVelocity(orbit);
-    const base = getOrbitBasePosition(orbit);
-    renderOrbit(orbit, base.x, base.y);
-  });
-
-  function animateToolOrbits(time) {
-    let frameDelta = 16.67;
-    orbitStates.forEach((orbit, index) => {
-      if (!orbit.lastTime) orbit.lastTime = time;
-      const delta = Math.min(time - orbit.lastTime, 34);
-      if (index === 0) frameDelta = delta || 16.67;
-      orbit.lastTime = time;
-      const travelDelta = Math.abs(orbit.velocity * delta);
-      orbit.angle += orbit.velocity * delta;
-      orbit.travel += travelDelta;
-
-      if (orbit.travel >= Math.PI * 2) {
-        orbit.travel -= Math.PI * 2;
-        randomizeOrbitVelocity(orbit);
-      }
-
-    });
-
-    updateOrbitInteractions(frameDelta / 16.67);
-    orbitStates.forEach((orbit) => {
-      const base = getOrbitBasePosition(orbit);
-      renderOrbit(orbit, base.x + orbit.offsetX, base.y + orbit.offsetY);
-    });
-
-    requestAnimationFrame(animateToolOrbits);
-  }
-
-  requestAnimationFrame(animateToolOrbits);
-}
-
-document.querySelector('#year').textContent = new Date().getFullYear();
+const updateHeader = () => siteHeader?.classList.toggle('is-scrolled', window.scrollY > 18);
+updateHeader();
+window.addEventListener('scroll', updateHeader, { passive: true });
 
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('is-visible');
-      revealObserver.unobserve(entry.target);
-    }
+    if (!entry.isIntersecting) return;
+    entry.target.classList.add('is-visible');
+    revealObserver.unobserve(entry.target);
   });
-}, { threshold: 0.12 });
+}, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
 
-document.querySelectorAll('.reveal').forEach((element) => revealObserver.observe(element));
+document.querySelectorAll('.reveal').forEach((item, index) => {
+  item.style.transitionDelay = `${Math.min(index % 4, 3) * 55}ms`;
+  revealObserver.observe(item);
+});
 
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-if (!reduceMotion) {
-  document.querySelectorAll('.project-card').forEach((card) => {
-    card.addEventListener('pointermove', (event) => {
-      const rect = card.getBoundingClientRect();
-      const x = (event.clientX - rect.left) / rect.width - 0.5;
-      const y = (event.clientY - rect.top) / rect.height - 0.5;
-      card.style.transform = `perspective(900px) rotateX(${y * -2.5}deg) rotateY(${x * 2.5}deg) translateY(-7px)`;
-    });
-    card.addEventListener('pointerleave', () => { card.style.transform = ''; });
+const sections = [...document.querySelectorAll('.section-anchor')];
+const navAnchors = [...document.querySelectorAll('.nav-links a')];
+function updateActiveSection() {
+  const marker = window.scrollY + (siteHeader?.offsetHeight || 0) + window.innerHeight * 0.24;
+  let visible = sections[0];
+  sections.forEach((section) => {
+    if (section.offsetTop <= marker) visible = section;
+  });
+  navAnchors.forEach((link) => {
+    link.classList.toggle('is-active', link.getAttribute('href') === `#${visible.id}`);
+  });
+}
+updateActiveSection();
+window.addEventListener('scroll', updateActiveSection, { passive: true });
+
+document.querySelector('#year').textContent = new Date().getFullYear();
+
+const starField = document.querySelector('#site-stars');
+if (starField) {
+  const starCount = window.innerWidth < 700 ? 46 : 78;
+  const fragment = document.createDocumentFragment();
+  for (let index = 0; index < starCount; index += 1) {
+    const star = document.createElement('span');
+    const noticeable = index % 13 === 0;
+    const size = noticeable ? 1.8 + Math.random() * 1.2 : 0.6 + Math.random() * 1.2;
+    star.className = `site-star${noticeable ? ' is-noticeable' : ''}`;
+    star.style.left = `${Math.random() * 100}%`;
+    star.style.top = `${Math.random() * 100}%`;
+    star.style.setProperty('--size', `${size}px`);
+    star.style.setProperty('--opacity', noticeable ? `${0.46 + Math.random() * 0.28}` : `${0.08 + Math.random() * 0.2}`);
+    star.style.setProperty('--twinkle', `${4.2 + Math.random() * 6.8}s`);
+    star.style.setProperty('--delay', `${-Math.random() * 8}s`);
+    fragment.appendChild(star);
+  }
+  starField.appendChild(fragment);
+}
+
+const shorts = [
+  ['gsOFUAuJ3Pc', 'GTA 6 Tidal System', false],
+  ['KgyFzMmVmF4', 'Make Sense', false],
+  ['GDHdmkyQ500', 'See You Again', false],
+  ['BkFptHb0MFc', 'GTA 6 Leak', false],
+  ['M1offHp1muc', 'Michael’s Car Reference', false],
+  ['MR5UlgWboSI', 'Franklin Is a Traitor', false],
+  ['CChpNWAgnFA', 'The GTA 6 Hacker', false],
+  ['WBtS4kjdC2o', 'Could This Be the Twist?', false],
+  ['49PbFTez5g8', 'GTA 6 Map in Minecraft', false],
+  ['WaIRZPtrgik', 'Early GTA 5 Hint', false],
+  ['TaiUWy3-MRc', 'Google Flow / 01', true],
+  ['J7Ckzlbz1K0', 'Google Flow / 02', true],
+  ['I5b3-CLgEz8', 'Google Flow / 03', true],
+  ['SqOGk9wZSuE', 'Google Flow / 04', true],
+  ['MUG-Dxo0IMo', 'Google Flow / 05', true],
+];
+
+const shortsGrid = document.querySelector('#shorts-grid');
+if (shortsGrid) {
+  const fragment = document.createDocumentFragment();
+  shorts.forEach(([id, title, unlisted], index) => {
+    const card = document.createElement('article');
+    card.className = 'short-card reveal';
+    card.innerHTML = `
+      <div class="video-frame short-frame">
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1"
+          title="${title}"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen></iframe>
+      </div>
+      <h3 class="short-title">${title}</h3>
+      <a class="short-link" href="https://youtube.com/shorts/${id}" target="_blank" rel="noreferrer">${unlisted ? 'Open unlisted short' : 'Open short'} ↗</a>`;
+    card.style.transitionDelay = `${Math.min(index % 4, 3) * 55}ms`;
+    fragment.appendChild(card);
+  });
+  shortsGrid.appendChild(fragment);
+  shortsGrid.querySelectorAll('.reveal').forEach((item) => revealObserver.observe(item));
+}
+
+const solarSystem = document.querySelector('#solar-system');
+const planetSystem = document.querySelector('#planet-system');
+const orbitRings = document.querySelector('.orbit-rings');
+const planets = [...document.querySelectorAll('.planet')];
+const particleCanvas = document.querySelector('#particle-field');
+const particleContext = particleCanvas?.getContext('2d');
+
+const solarState = {
+  width: 0,
+  height: 0,
+  scale: 1,
+  pointerX: 0,
+  pointerY: 0,
+  pointerActive: false,
+  particles: [],
+  start: performance.now(),
+};
+
+function sizeSolarSystem() {
+  if (!solarSystem) return;
+  const bounds = solarSystem.getBoundingClientRect();
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  solarState.width = bounds.width;
+  solarState.height = bounds.height;
+  solarState.scale = Math.min(1, bounds.width / 680);
+
+  if (particleCanvas && particleContext) {
+    particleCanvas.width = Math.round(bounds.width * pixelRatio);
+    particleCanvas.height = Math.round(bounds.height * pixelRatio);
+    particleContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+  }
+
+  solarState.particles = Array.from({ length: Math.round(220 * Math.max(0.68, solarState.scale)) }, () => {
+    const radius = Math.pow(Math.random(), 0.58) * Math.min(bounds.width, bounds.height) * 0.27;
+    const angle = Math.random() * Math.PI * 2;
+    return {
+      angle,
+      radius,
+      size: 0.55 + Math.random() * 1.6,
+      drift: (Math.random() - 0.5) * 0.12,
+      alpha: 0.18 + Math.random() * 0.54,
+      phase: Math.random() * Math.PI * 2,
+    };
+  });
+
+  orbitRings?.replaceChildren();
+  planets.forEach((planet, index) => {
+    const radius = Number(planet.dataset.radius) * solarState.scale;
+    const size = Math.max(24, Number(planet.dataset.size) * solarState.scale);
+    planet.style.setProperty('--planet-size', `${size}px`);
+    planet.title = planet.dataset.name || '';
+
+    if (orbitRings) {
+      const ring = document.createElement('span');
+      ring.className = 'orbit-ring';
+      ring.style.width = `${radius * 2}px`;
+      ring.style.height = `${radius * 0.98}px`;
+      ring.style.setProperty('--ring-opacity', String(0.1 + index * 0.018));
+      orbitRings.appendChild(ring);
+    }
   });
 }
 
-window.addEventListener('scroll', () => {
-  document.querySelector('.site-header')?.classList.toggle('is-scrolled', window.scrollY > 24);
-}, { passive: true });
+function updateSolarPointer(event) {
+  if (!solarSystem) return;
+  const bounds = solarSystem.getBoundingClientRect();
+  solarState.pointerX = Math.max(-1, Math.min(1, (event.clientX - bounds.left - bounds.width / 2) / (bounds.width / 2)));
+  solarState.pointerY = Math.max(-1, Math.min(1, (event.clientY - bounds.top - bounds.height / 2) / (bounds.height / 2)));
+  solarState.pointerActive = true;
+  solarSystem.classList.add('is-engaged');
+}
 
-/* Custom crosshair: scrolling down turns clockwise, scrolling up turns counter-clockwise. */
-(function setupScrollCursor() {
-  if (window.matchMedia('(pointer:coarse)').matches) return;
-  const cursor = document.createElement('div');
-  cursor.className = 'cursor-crosshair';
-  cursor.setAttribute('aria-hidden', 'true');
-  document.body.append(cursor);
-  document.body.classList.add('cursor-enhanced');
+solarSystem?.addEventListener('pointerenter', updateSolarPointer);
+solarSystem?.addEventListener('pointermove', updateSolarPointer);
+solarSystem?.addEventListener('pointerleave', () => {
+  solarState.pointerActive = false;
+  solarSystem.classList.remove('is-engaged');
+});
 
-  let rotation = 0;
-  let lastScrollY = window.scrollY;
-  const setPointerState = (event) => {
-    cursor.style.left = `${event.clientX}px`;
-    cursor.style.top = `${event.clientY}px`;
-    cursor.classList.add('is-visible');
-    const target = event.target;
-    const clickable = target?.closest?.('a,button,[role="button"],summary,select,input,textarea,iframe') || target?.matches?.('a,button,iframe');
-    cursor.classList.toggle('is-clickable', Boolean(clickable));
-  };
-  document.addEventListener('pointermove', setPointerState, { passive: true });
-  document.addEventListener('pointerover', setPointerState, { passive: true });
-  document.addEventListener('pointerout', (event) => {
-    if (!event.relatedTarget) cursor.classList.remove('is-visible');
-  }, { passive: true });
-  window.addEventListener('scroll', () => {
-    const currentScrollY = window.scrollY;
-    if (currentScrollY !== lastScrollY) {
-      rotation += currentScrollY > lastScrollY ? 24 : -24;
-      cursor.style.setProperty('--cursor-rotation', `${rotation}deg`);
-      lastScrollY = currentScrollY;
-    }
-  }, { passive: true });
-})();
+function drawParticles(time) {
+  if (!particleContext || !particleCanvas) return;
+  const centerX = solarState.width / 2;
+  const centerY = solarState.height / 2;
+  particleContext.clearRect(0, 0, solarState.width, solarState.height);
 
-/* The Reels intro borrows the Home planet's tools, then lets them drift in place. */
-(function setupReelsToolBurst() {
-  const cluster = document.querySelector('#reels-tools-cluster');
-  if (!cluster) return;
-  const orbs = [...cluster.querySelectorAll('.reels-tool-orb')];
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const randomBetween = (minimum, maximum) => minimum + Math.random() * (maximum - minimum);
-  const burstDuration = 1240;
-  const burstStagger = 55;
-  const pointer = { x: 0, y: 0, active: false };
-  const orbStates = [];
+  solarState.particles.forEach((particle) => {
+    const angle = particle.angle + time * particle.drift * 0.0001;
+    const pulse = 1 + Math.sin(time * 0.0014 + particle.phase) * 0.035;
+    const x = centerX + Math.cos(angle) * particle.radius * pulse;
+    const y = centerY + Math.sin(angle) * particle.radius * 0.56 * pulse;
+    const pointerPixelX = centerX + solarState.pointerX * solarState.width / 2;
+    const pointerPixelY = centerY + solarState.pointerY * solarState.height / 2;
+    const distance = Math.hypot(pointerPixelX - x, pointerPixelY - y);
+    const influence = solarState.pointerActive ? Math.max(0, 1 - distance / 54) : 0;
 
-  orbs.forEach((orb, index) => {
-    const angle = (index / orbs.length) * Math.PI * 2 + randomBetween(-0.32, 0.32);
-    const distance = randomBetween(68, 150);
-    const baseX = Math.cos(angle) * distance;
-    const baseY = Math.sin(angle) * distance * 0.72;
-    orbStates.push({ orb, baseX, baseY, avoidX: 0, avoidY: 0, velocityX: 0, velocityY: 0 });
-    orb.style.setProperty('--x', `${baseX}px`);
-    orb.style.setProperty('--y', `${baseY}px`);
-    orb.style.setProperty('--size', `${Math.round(randomBetween(52, 86))}px`);
-    orb.style.setProperty('--rotation', `${Math.round(randomBetween(-14, 14))}deg`);
-    orb.style.setProperty('--float-x', `${Math.round(randomBetween(-10, 10))}px`);
-    orb.style.setProperty('--float-y', `${Math.round(randomBetween(-12, 12))}px`);
-    orb.style.setProperty('--float-duration', `${randomBetween(3.8, 6.2).toFixed(2)}s`);
-    /* Positive delays preserve the burst's final transform instead of jumping into the middle of a float cycle. */
-    orb.style.setProperty('--float-delay', `${randomBetween(0.08, 1.15).toFixed(2)}s`);
-    orb.style.setProperty('--burst-delay', `${(index * burstStagger / 1000).toFixed(2)}s`);
-    orb.style.setProperty('--avoid-x', '0px');
-    orb.style.setProperty('--avoid-y', '0px');
+    particleContext.beginPath();
+    particleContext.arc(x, y, particle.size + influence * 0.85, 0, Math.PI * 2);
+    particleContext.fillStyle = influence > 0.08
+      ? `rgba(200,255,50,${0.32 + influence * 0.68})`
+      : `rgba(174,181,169,${particle.alpha})`;
+    particleContext.fill();
+  });
+}
+
+function animateSolarSystem(time) {
+  const elapsed = reduceMotion ? 0 : (time - solarState.start) / 1000;
+  const pointerLightX = solarState.pointerActive ? solarState.pointerX * 5 : 0;
+  const pointerLightY = solarState.pointerActive ? solarState.pointerY * 5 : 0;
+
+  planets.forEach((planet) => {
+    const radius = Number(planet.dataset.radius) * solarState.scale;
+    const speed = Number(planet.dataset.speed);
+    const phase = Number(planet.dataset.phase);
+    const angle = phase + elapsed * speed;
+    const cosine = Math.cos(angle);
+    const sine = Math.sin(angle);
+    const x = cosine * radius;
+    const y = sine * radius * 0.49;
+    const depth = sine;
+    const depthScale = 0.82 + (depth + 1) * 0.11;
+    const lightX = 50 - cosine * 30 + pointerLightX;
+    const lightY = 50 - sine * 22 + pointerLightY;
+    const shadowX = cosine * 9;
+    const shadowY = sine * 7;
+
+    planet.style.setProperty('--planet-x', `${x}px`);
+    planet.style.setProperty('--planet-y', `${y}px`);
+    planet.style.setProperty('--planet-z', `${depth * 54}px`);
+    planet.style.setProperty('--planet-scale', depthScale.toFixed(3));
+    planet.style.setProperty('--light-x', `${lightX}%`);
+    planet.style.setProperty('--light-y', `${lightY}%`);
+    planet.style.setProperty('--shadow-x', `${shadowX}px`);
+    planet.style.setProperty('--shadow-y', `${shadowY}px`);
+    planet.style.zIndex = String(10 + Math.round((depth + 1) * 20));
   });
 
-  const setPointer = (event) => {
-    pointer.x = event.clientX;
-    pointer.y = event.clientY;
-    pointer.active = true;
-  };
-  document.addEventListener('pointermove', setPointer, { passive: true });
-  document.addEventListener('pointerout', (event) => {
-    if (!event.relatedTarget) pointer.active = false;
-  }, { passive: true });
-  window.addEventListener('blur', () => { pointer.active = false; }, { passive: true });
+  drawParticles(time);
+  if (!reduceMotion) requestAnimationFrame(animateSolarSystem);
+}
 
-  const updatePointerAvoidance = () => {
-    const bounds = cluster.getBoundingClientRect();
-    const centerX = bounds.left + bounds.width / 2;
-    const centerY = bounds.top + bounds.height / 2;
-    const pointerX = pointer.x - centerX;
-    const pointerY = pointer.y - centerY;
+if (solarSystem && planetSystem) {
+  sizeSolarSystem();
+  window.addEventListener('resize', sizeSolarSystem, { passive: true });
+  requestAnimationFrame(animateSolarSystem);
+}
 
-    orbStates.forEach((state) => {
-      const deltaX = state.baseX + state.avoidX - pointerX;
-      const deltaY = state.baseY + state.avoidY - pointerY;
-      const distance = Math.hypot(deltaX, deltaY);
-      const influence = pointer.active ? Math.max(0, 1 - distance / 128) : 0;
-      const push = influence * influence * 34;
-      const targetX = distance > 0 ? (deltaX / distance) * push : 0;
-      const targetY = distance > 0 ? (deltaY / distance) * push : 0;
+function parseColor(color) {
+  const match = color.match(/rgba?\(([^)]+)\)/);
+  if (!match) return null;
+  const values = match[1].split(',').map((value) => Number.parseFloat(value.trim()));
+  return { r: values[0], g: values[1], b: values[2], a: values.length > 3 ? values[3] : 1 };
+}
 
-      state.velocityX += (targetX - state.avoidX) * 0.12;
-      state.velocityY += (targetY - state.avoidY) * 0.12;
-      state.velocityX *= 0.78;
-      state.velocityY *= 0.78;
-      state.avoidX = Math.max(-42, Math.min(42, state.avoidX + state.velocityX));
-      state.avoidY = Math.max(-42, Math.min(42, state.avoidY + state.velocityY));
-      state.orb.style.setProperty('--avoid-x', `${state.avoidX.toFixed(2)}px`);
-      state.orb.style.setProperty('--avoid-y', `${state.avoidY.toFixed(2)}px`);
-    });
+function cursorColorFor(target) {
+  if (!(target instanceof Element)) return '#f4f5ef';
+  const explicit = target.closest('[data-cursor-tone]')?.getAttribute('data-cursor-tone');
+  if (explicit === 'dark') return '#070807';
+  if (explicit === 'light') return '#f4f5ef';
 
-    requestAnimationFrame(updatePointerAvoidance);
-  };
-  requestAnimationFrame(updatePointerAvoidance);
-
-  const launch = () => {
-    if (reducedMotion) {
-      cluster.classList.add('is-idle');
-      return;
+  let node = target;
+  while (node && node !== document.documentElement) {
+    const color = parseColor(getComputedStyle(node).backgroundColor);
+    if (color && color.a > 0.22) {
+      const luminance = (0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b) / 255;
+      return luminance > 0.52 ? '#070807' : '#f4f5ef';
     }
-    cluster.classList.add('is-burst');
-
-    let handedOff = false;
-    const switchToIdle = () => {
-      if (handedOff) return;
-      handedOff = true;
-      cluster.classList.remove('is-burst');
-      cluster.classList.add('is-idle');
-    };
-    const fallback = window.setTimeout(switchToIdle, burstDuration + (orbs.length - 1) * burstStagger + 160);
-    const onBurstEnd = (event) => {
-      if (event.animationName !== 'reels-tool-burst') return;
-      if (orbs.every((orb) => orb.dataset.burstDone === 'true')) {
-        window.clearTimeout(fallback);
-        switchToIdle();
-      }
-    };
-    orbs.forEach((orb) => {
-      orb.addEventListener('animationend', () => {
-        orb.dataset.burstDone = 'true';
-        onBurstEnd({ animationName: 'reels-tool-burst' });
-      }, { once: true });
-    });
-  };
-
-  if (!('IntersectionObserver' in window)) {
-    launch();
-    return;
+    node = node.parentElement;
   }
-  const clusterObserver = new IntersectionObserver((entries) => {
-    if (entries.some((entry) => entry.isIntersecting)) {
-      clusterObserver.disconnect();
-      launch();
-    }
-  }, { threshold: 0.16 });
-  clusterObserver.observe(cluster);
-})();
+  return '#f4f5ef';
+}
+
+if (finePointer) {
+  const cursor = document.createElement('div');
+  cursor.className = 'cursor-crosshair';
+  document.body.appendChild(cursor);
+  let scrollRotation = 0;
+  let previousScroll = window.scrollY;
+
+  document.addEventListener('pointermove', (event) => {
+    const target = event.target;
+    cursor.style.left = `${event.clientX}px`;
+    cursor.style.top = `${event.clientY}px`;
+    cursor.style.setProperty('--cursor-color', cursorColorFor(target));
+    cursor.classList.add('is-visible');
+    cursor.classList.toggle('is-clickable', target instanceof Element && Boolean(target.closest('a, button, iframe, [role="button"]')));
+  }, { passive: true });
+
+  document.addEventListener('pointerleave', () => cursor.classList.remove('is-visible'));
+  window.addEventListener('scroll', () => {
+    const delta = window.scrollY - previousScroll;
+    scrollRotation = (scrollRotation + Math.max(-28, Math.min(28, delta * 0.42))) % 360;
+    previousScroll = window.scrollY;
+    cursor.style.setProperty('--cursor-rotation', `${scrollRotation}deg`);
+  }, { passive: true });
+}
