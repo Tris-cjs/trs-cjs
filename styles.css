@@ -240,6 +240,7 @@ h2 em {
 }
 .planet-sphere {
   position: relative;
+  isolation: isolate;
   display: grid;
   width: 100%;
   height: 100%;
@@ -264,6 +265,23 @@ h2 em {
   height: 54%;
   object-fit: contain;
   filter: drop-shadow(0 2px 2px rgba(255, 255, 255, 0.22));
+}
+.planet[data-logo-blend="multiply"] .planet-sphere img {
+  width: 62%;
+  height: 62%;
+  mix-blend-mode: multiply;
+  filter: saturate(1.18) contrast(1.06) drop-shadow(0 1px 2px rgba(255, 255, 255, 0.14));
+}
+.planet[data-logo-blend="screen"] .planet-sphere img {
+  width: 64%;
+  height: 64%;
+  mix-blend-mode: screen;
+  filter: saturate(1.16) brightness(1.07) drop-shadow(0 0 3px rgba(255, 255, 255, 0.22));
+}
+.planet[data-logo-style="tile"] .planet-sphere img {
+  width: 59%;
+  height: 59%;
+  border-radius: 24%;
 }
 .sun {
   position: absolute;

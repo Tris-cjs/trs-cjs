@@ -184,6 +184,10 @@ const orbitProfiles = [
   { tilt: -9, tiltRange: 5.1, pivotSpeed: 0.036, pivotPhase: 3.8, pivotDirection: -1, flatten: 0.48, flattenRange: 0.022, flattenSpeed: 0.031 },
   { tilt: 4, tiltRange: 4.2, pivotSpeed: 0.041, pivotPhase: 5.1, pivotDirection: 1, flatten: 0.51, flattenRange: 0.02, flattenSpeed: 0.035 },
   { tilt: -2, tiltRange: 5.8, pivotSpeed: 0.032, pivotPhase: 0.9, pivotDirection: -1, flatten: 0.49, flattenRange: 0.025, flattenSpeed: 0.029 },
+  { tilt: 11, tiltRange: 3.9, pivotSpeed: 0.046, pivotPhase: 2.1, pivotDirection: -1, flatten: 0.46, flattenRange: 0.02, flattenSpeed: 0.036 },
+  { tilt: -15, tiltRange: 4.7, pivotSpeed: 0.038, pivotPhase: 4.4, pivotDirection: 1, flatten: 0.53, flattenRange: 0.018, flattenSpeed: 0.03 },
+  { tilt: 2, tiltRange: 5.4, pivotSpeed: 0.034, pivotPhase: 5.8, pivotDirection: -1, flatten: 0.45, flattenRange: 0.023, flattenSpeed: 0.033 },
+  { tilt: 14, tiltRange: 4.1, pivotSpeed: 0.042, pivotPhase: 3.2, pivotDirection: 1, flatten: 0.50, flattenRange: 0.021, flattenSpeed: 0.028 },
 ];
 
 const solarState = {
